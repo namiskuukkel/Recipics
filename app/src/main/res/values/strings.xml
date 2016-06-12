@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Recipics</string>
+    <string name="action_settings">Settings</string>
+    <string name="new_picture">Take a new picture</string>
+    <string name="recipeName">Recipe name</string>
+    <string name="notes">Notes about this recipe</string>
+    <string name="source">Recipe source</string>
+    <string name="save">Save</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>
