@@ -44,13 +44,16 @@ public class RecipeDetailsFillActivity extends AppCompatActivity {
     }
 
     public void addTag() {
-        TagView tagGroup = (TagView) findViewById(R.id.tag_group);
-        Tag tag = new Tag("FUU");
-        tag.isDeletable = true;
-        tag.layoutColor = Color.parseColor("#BEDDED");
-        //You can add one tag
-        tagGroup.addTag(tag);
-
+        DBHelper db = new DBHelper(this);
+        ArrayList<software.kuukkel.fi.recipics.Tag> tags = db.getAllTags();
+        for (software.kuukkel.fi.recipics.Tag t: tags ) {
+            TagView tagGroup = (TagView) findViewById(R.id.tag_group);
+            Tag tag = new Tag(t.getName());
+            tag.isDeletable = true;
+            tag.layoutColor = Color.parseColor(t.getColor());
+            //You can add one tag
+            tagGroup.addTag(tag);
+        }
         //You can add multiple tag via ArrayList
         //tagGroup.addTags();
         //Via string array

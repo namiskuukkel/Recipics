@@ -142,6 +142,22 @@ public class DBHelper extends SQLiteOpenHelper {
         return array_list;
     }
 
+    public ArrayList<Tag> getAllTags()
+    {
+        ArrayList<Tag> array_list = new ArrayList<Tag>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from " + TagEntry.TAGS_TABLE_NAME, null );
+        res.moveToFirst();
+
+        while(res.isAfterLast() == false){
+            array_list.add(new Tag(res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_NAME )),
+                    res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_COLOR))));
+            res.moveToNext();
+        }
+        return array_list;
+    }
+
     public void insertDefaultTags(Tag[] tags){
         SQLiteDatabase db = this.getWritableDatabase();
         for ( Tag tag : tags) {
