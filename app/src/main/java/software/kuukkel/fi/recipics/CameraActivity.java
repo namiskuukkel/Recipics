@@ -144,6 +144,7 @@ public class CameraActivity extends AppCompatActivity {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             ll.addView(next, lp);
 
+            //Get the pic
             Uri uri = fileUri;
             try {
                 ExifInterface exif = new ExifInterface(uri.getPath());
