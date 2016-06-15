@@ -24,7 +24,7 @@ public class DBConst {
         public static final String RECIPES_COLUMN_SOURCE = "source";
     }
 
-    public static final String CREATE_TABLE_TAGS = "create table " + RecipeEntry.RECIPES_TABLE_NAME +
+    public static final String CREATE_TABLE_RECIPES = "create table " + RecipeEntry.RECIPES_TABLE_NAME +
             " (" + RecipeEntry._ID + NUMBER_TYPE + " primary key" + COMMA_SEP
             + RecipeEntry.RECIPES_COLUMN_NAME + TEXT_TYPE + COMMA_SEP +
             RecipeEntry.RECIPES_COLUMN_NOTES + TEXT_TYPE + COMMA_SEP +
@@ -39,10 +39,9 @@ public class DBConst {
         public static final String TAGS_COLUMN_COLOR = "color";
     }
 
-    public static final String CREATE_TABLE_RECIPES = "create table " + TagEntry.TAGS_TABLE_NAME +
-            " (" + TagEntry._ID + NUMBER_TYPE + " primary key" + COMMA_SEP
-            + TagEntry.TAGS_COLUMN_NAME + TEXT_TYPE + COMMA_SEP
-            + TagEntry.TAGS_COLUMN_COLOR + TEXT_TYPE + COMMA_SEP + ")";
+    public static final String CREATE_TABLE_TAGS = "create table " + TagEntry.TAGS_TABLE_NAME +
+            " (" + TagEntry.TAGS_COLUMN_NAME + TEXT_TYPE + " primary key" + COMMA_SEP
+            + TagEntry.TAGS_COLUMN_COLOR + TEXT_TYPE + ")";
 
 
     public static abstract class PathEntry implements BaseColumns {

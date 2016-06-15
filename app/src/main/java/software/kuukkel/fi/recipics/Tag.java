@@ -4,7 +4,6 @@ package software.kuukkel.fi.recipics;
  * Created by namiskuukkel on 7.6.2016.
  */
 public class Tag {
-    private long id;
     private String name;
     //Tag may have a color at some point
     private String color;
@@ -26,14 +25,6 @@ public class Tag {
         this.name = name;
         this.color = color;
         this.type = type;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {

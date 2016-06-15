@@ -165,7 +165,6 @@ public class DBHelper extends SQLiteOpenHelper {
             contentValues.put(TagEntry.TAGS_COLUMN_NAME, tag.getName());
             contentValues.put(TagEntry.TAGS_COLUMN_COLOR, tag.getColor());
             long id = db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
-            tag.setId(id);
         }
 
     }
