@@ -12,8 +12,7 @@
         android:id="@+id/capturedImageview"
         android:src="@drawable/fudz"
         android:minWidth="20px"
-        android:minHeight="20px"
-        android:maxHeight="500px"/>
+        android:minHeight="20px"/>
 
     <Button
         android:layout_width="wrap_content"

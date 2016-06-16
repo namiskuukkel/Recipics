@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,6 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.R.attr.width;
+import static software.kuukkel.fi.recipics.R.attr.height;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -137,12 +141,6 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Button next = new Button(this);
-            next.setText("Next");
-
-            LinearLayout ll = (LinearLayout)findViewById(R.id.camera_layout);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            ll.addView(next, lp);
 
             //Get the pic
             Uri uri = fileUri;
@@ -154,11 +152,21 @@ public class CameraActivity extends AppCompatActivity {
             }
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
-            Bitmap myImg = BitmapFactory.decodeFile(uri.getPath());
-            Bitmap rotatedBitmap = Bitmap.createBitmap(myImg, 0, 0, myImg.getWidth(), myImg.getHeight(), matrix, true);
+
+            Bitmap resized = HerperClass.getPreview(uri);
+            Bitmap rotatedBitmap = Bitmap.createBitmap(resized, 0, 0, resized.getWidth(),
+                    resized.getHeight(), matrix, true);
+
             ImageView mImageView = (ImageView) findViewById(R.id.capturedImageview);
             mImageView.setImageBitmap(rotatedBitmap);
 
+            Button next = new Button(this);
+            next.setText("Next");
+            //TODO: Make the button invisible
+            LinearLayout ll = (LinearLayout)findViewById(R.id.camera_layout);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            ll.addView(next, lp);
         }
     }
 }
