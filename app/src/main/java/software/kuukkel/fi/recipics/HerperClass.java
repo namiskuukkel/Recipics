@@ -8,6 +8,8 @@ import java.io.File;
 import android.net.Uri;
 import android.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import static software.kuukkel.fi.recipics.Tag.Type.DISH;
@@ -24,19 +26,5 @@ public class HerperClass {
         return tags;
     }
 
-    static Bitmap getPreview(Uri uri) {
 
-        BitmapFactory.Options bounds = new BitmapFactory.Options();
-        bounds.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(uri.getPath(), bounds);
-        if ((bounds.outWidth == -1) || (bounds.outHeight == -1))
-            return null;
-
-        int originalSize = (bounds.outHeight > bounds.outWidth) ? bounds.outHeight
-                : bounds.outWidth;
-
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = 4;
-        return BitmapFactory.decodeFile(uri.getPath(), opts);
-    }
 }
