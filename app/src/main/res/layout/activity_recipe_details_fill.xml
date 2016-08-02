@@ -12,20 +12,21 @@
         android:layout_height="wrap_content"
         android:text="@string/recipeName"
         android:id="@+id/nameText"
-        android:layout_gravity="left" />
+        android:layout_gravity="start" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editName"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:hint="@string/hint_recipe_name"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/notes"
         android:id="@+id/notesText"
-        android:layout_gravity="left" />
+        android:layout_gravity="start" />
 
     <EditText
         android:layout_width="match_parent"
@@ -33,21 +34,22 @@
         android:inputType="textMultiLine"
         android:ems="10"
         android:id="@+id/editNotes"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:hint="@string/notes"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/source"
         android:id="@+id/sourceText"
-        android:layout_gravity="left" />
+        android:layout_gravity="start" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editSource"
         android:layout_gravity="center_horizontal"
-        android:hint="My Favorite Cook Book" />
+        android:hint="@string/hint_source" />
 
     <com.cunoraz.tagview.TagView
         android:id="@+id/tag_group"

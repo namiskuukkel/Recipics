@@ -26,8 +26,7 @@ public class RecipeDetailsFillActivity extends AppCompatActivity {
 
         tagGroup = new TagView(this);
         addTag();
-        addTag();
-        addTag();
+
         //set click listener
         tagGroup.setOnTagClickListener(new OnTagClickListener() {
             @Override

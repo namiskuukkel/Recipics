@@ -7,6 +7,9 @@
     <string name="source">Recipe source</string>
     <string name="save">Save</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="hint_recipe_name">Banana Bread</string>
+    <string name="hint_notes">Bake for 10min only</string>
+    <string name="hint_source">My Favorite Cook Book</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

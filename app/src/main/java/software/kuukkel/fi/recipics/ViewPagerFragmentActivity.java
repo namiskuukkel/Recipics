@@ -1,29 +1,5 @@
 package software.kuukkel.fi.recipics;
 
-import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
-import android.media.ThumbnailUtils;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,12 +7,32 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
-import static android.app.Activity.RESULT_OK;
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
+import android.view.View;
 
-
-public class CameraActivity extends Fragment {
-
+/**
+ * The <code>ViewPagerFragmentActivity</code> class is the fragment activity hosting the ViewPager
+ * @author mwho
+ */
+public class ViewPagerFragmentActivity extends FragmentActivity{
     public final static String PATHS = "paths";
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -45,35 +41,37 @@ public class CameraActivity extends Fragment {
     private String mCurrentPhotoPath;
     private Uri mCurrentPhotoUri;
     private ArrayList<Uri> fileUris;
-
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        if (container == null) {
-            // We have different layouts, and in one of them this
-            // fragment's containing frame doesn't exist.  The fragment
-            // may still be created from its saved state, but there is
-            // no reason to try to create its view hierarchy because it
-            // won't be displayed.  Note this is not needed -- we could
-            // just run the code below, where we would create and return
-            // the view hierarchy; it would just never be used.
-            fileUris = new ArrayList<>();
-            return null;
-        }
-        return (LinearLayout)inflater.inflate(R.layout.activity_camera, container, false);
-    }
-    /*@Override
+    /** maintains the pager adapter*/
+    private PagerAdapter mPagerAdapter;
+    /* (non-Javadoc)
+     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+     */
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
-        fileUris = new ArrayList<Uri>();
-    }*/
+        super.setContentView(R.layout.fragment_view_pager);
+        //initialsie the pager
+        this.initialisePaging();
+    }
 
+    /**
+     * Initialise the fragments to be paged
+     */
+    private void initialisePaging() {
+
+        List<Fragment> fragments = new Vector<Fragment>();
+        fragments.add(Fragment.instantiate(this, CameraActivity.class.getName()));
+        this.mPagerAdapter  = new PagerAdapter(super.getSupportFragmentManager(), fragments);
+        //
+        ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);
+        pager.setAdapter(this.mPagerAdapter);
+    }
 
     public void startCamera(View view) {
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
             checkPermissions();
             // Create the File where the photo should go
@@ -87,8 +85,7 @@ public class CameraActivity extends Fragment {
             // Continue only if the File was successfully created
             if (photoFile != null) {
 
-                mCurrentPhotoUri = FileProvider.getUriForFile(getActivity(),
-                        "software.kuukkel.fi.recipics.fileprovider",
+                mCurrentPhotoUri = FileProvider.getUriForFile(this, "software.kuukkel.fi.recipics.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         mCurrentPhotoUri);
@@ -99,46 +96,11 @@ public class CameraActivity extends Fragment {
             }
         }
     }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-
-            fileUris.add(mCurrentPhotoUri);
-            galleryAddPic();
-
-            try {
-                ExifInterface exif = new ExifInterface(mCurrentPhotoUri.getPath());
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.d("st", ex.getMessage());
-            }
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-
-            Bitmap resized = getPreview(mCurrentPhotoUri);
-            //Bitmap rotatedBitmap = Bitmap.createBitmap(resized, 0, 0, resized.getWidth(),
-            //        resized.getHeight(), matrix, true);
-
-            ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
-            mImageView.setImageBitmap(resized);
-
-            Button next = (Button) getView().findViewById(R.id.nextButton);
-            next.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void startDetailFill(View view) {
-        Intent intent = new Intent(getActivity(), RecipeDetailsFillActivity.class);
-        intent.putExtra(PATHS, fileUris);
-        startActivity(intent);
-    }
-
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -155,7 +117,7 @@ public class CameraActivity extends Fragment {
         File f = new File(mCurrentPhotoPath);
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
-        getActivity().sendBroadcast(mediaScanIntent);
+        this.sendBroadcast(mediaScanIntent);
     }
 
     private Bitmap getPreview(Uri uri) {
@@ -163,7 +125,7 @@ public class CameraActivity extends Fragment {
         InputStream in = null;
         try {
             final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
-            in = getContext().getContentResolver().openInputStream(uri);
+            in = this.getContentResolver().openInputStream(uri);
 
             // Decode image size
             BitmapFactory.Options o = new BitmapFactory.Options();
@@ -185,7 +147,7 @@ public class CameraActivity extends Fragment {
             Log.d("", "scale = " + scale + ", orig-width: " + o.outWidth + ", orig-height: " + o.outHeight);
 
             Bitmap b = null;
-            in = getActivity().getContentResolver().openInputStream(uri);
+            in = this.getContentResolver().openInputStream(uri);
             if (scale > 1) {
                 scale--;
                 // scale to max possible inSampleSize that still yields an image
@@ -225,12 +187,12 @@ public class CameraActivity extends Fragment {
 
     public void checkPermissions() {
         // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(getActivity(),
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED ) {
 
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
                 // Show an expanation to the user *asynchronously* -- don't block
@@ -240,17 +202,17 @@ public class CameraActivity extends Fragment {
 
                 // No explanation needed, we can request the permission.
 
-                ActivityCompat.requestPermissions(getActivity(),
+                ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE);
             }
         }
-        if (ContextCompat.checkSelfPermission(getActivity(),
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED ) {
 
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
                 // Show an expanation to the user *asynchronously* -- don't block
@@ -260,7 +222,7 @@ public class CameraActivity extends Fragment {
 
                 // No explanation needed, we can request the permission.
 
-                ActivityCompat.requestPermissions(getActivity(),
+                ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE);
             }

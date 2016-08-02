@@ -46,9 +46,21 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_TABLE + RecipeEntry.RECIPES_TABLE_NAME);
         db.execSQL(DROP_TABLE + TagEntry.TAGS_TABLE_NAME);
         db.execSQL(DROP_TABLE + PathEntry.PATHS_TABLE_NAME);
+        db.execSQL(DROP_TABLE + RecipeToPathEntry.RECIPETOPATH_TABLE_NAME);
+        db.execSQL(DROP_TABLE + RecipeToTagEntry.RECIPETOTAG_TABLE_NAME);
         onCreate(db);
     }
 
+    //TODO: Remove the usage and add create default tags
+    public void chickenDestroy() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(DROP_TABLE + RecipeEntry.RECIPES_TABLE_NAME);
+        db.execSQL(DROP_TABLE + TagEntry.TAGS_TABLE_NAME);
+        db.execSQL(DROP_TABLE + PathEntry.PATHS_TABLE_NAME);
+        db.execSQL(DROP_TABLE + RecipeToPathEntry.RECIPETOPATH_TABLE_NAME);
+        db.execSQL(DROP_TABLE + RecipeToTagEntry.RECIPETOTAG_TABLE_NAME);
+        onCreate(db);
+    }
     public boolean insertRecipe  (String name, String[] paths, String notes, Boolean starred,
                                   String source, String[] tags)
     {
@@ -166,6 +178,5 @@ public class DBHelper extends SQLiteOpenHelper {
             contentValues.put(TagEntry.TAGS_COLUMN_COLOR, tag.getColor());
             long id = db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
         }
-
     }
 }
