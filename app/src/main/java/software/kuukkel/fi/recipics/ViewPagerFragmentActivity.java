@@ -61,6 +61,8 @@ public class ViewPagerFragmentActivity extends FragmentActivity{
 
         List<Fragment> fragments = new Vector<Fragment>();
         fragments.add(Fragment.instantiate(this, CameraActivity.class.getName()));
+        fragments.add(Fragment.instantiate(this, RecipeDetailsFillActivity.class.getName()));
+        fragments.add(Fragment.instantiate(this, TagFragment.class.getName()));
         this.mPagerAdapter  = new PagerAdapter(super.getSupportFragmentManager(), fragments);
         //
         ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);

@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -15,7 +14,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,15 +57,23 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
             return null;
         }
         fileUris = new ArrayList<>();
-        View mahView = inflater.inflate(R.layout.activity_camera, container, false);
-        Button pic = (Button) mahView.findViewById(R.id.new_picture);
-        pic.setOnClickListener(this);
+        View mahView = inflater.inflate(R.layout.fragment_camera, container, false);
+        mahView.findViewById(R.id.newPicture).setOnClickListener(this);
+        mahView.findViewById(R.id.nextButton).setOnClickListener(this);
 
         return mahView;
     }
 
     public void onClick(View view) {
+        if(view.getId() == R.id.newPicture) {
+            startCamera(view);
+        }
+        else if(view.getId() == R.id.nextButton){
+            startDetailFill(view);
+        }
+    }
 
+    private void startCamera(View view) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
@@ -95,7 +100,6 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
             }
         }
     }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
@@ -125,9 +129,15 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
     }
 
     public void startDetailFill(View view) {
-        Intent intent = new Intent(getActivity(), RecipeDetailsFillActivity.class);
-        intent.putExtra(PATHS, fileUris);
-        startActivity(intent);
+
+        RecipeDetailsFillActivity nextFrag= new RecipeDetailsFillActivity();
+        /*Bundle bundle = new Bundle();
+        bundle.putUr(PATHS, fileUris);
+        nextFrag.setArguments(bundle);*/
+        this.getFragmentManager().beginTransaction()
+                .replace(R.id.viewpager, nextFrag, null)
+                .addToBackStack(null)
+                .commit();
     }
 
     private File createImageFile() throws IOException {

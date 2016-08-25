@@ -1,28 +1,26 @@
 package software.kuukkel.fi.recipics;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.graphics.Color;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import com.cunoraz.tagview.OnTagClickListener;
-import com.cunoraz.tagview.OnTagDeleteListener;
 import com.cunoraz.tagview.TagView;
 import com.cunoraz.tagview.Tag;
 import com.cunoraz.tagview.Constants;
 
 public class RecipeDetailsFillActivity extends Fragment {
 
-    private TagView tagGroup;
-    private ArrayList< Tag > tagList;
+
+    View mahView;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -36,49 +34,10 @@ public class RecipeDetailsFillActivity extends Fragment {
             // the view hierarchy; it would just never be used.
             return null;
         }
-        tagGroup = new TagView(getActivity());
-        addTag();
 
-        //set click listener
-        tagGroup.setOnTagClickListener(new OnTagClickListener() {
-            @Override
-            public void onTagClick(Tag tag, int position) {
-            }
-        });
+        mahView = inflater.inflate(R.layout.fragment_recipe_details_fill, container, false);
 
-        return (LinearLayout)inflater.inflate(R.layout.activity_camera, container, false);
+        return mahView;
     }
 
-    public void addTag() {
-        DBHelper db = new DBHelper(getActivity());
-        ArrayList<software.kuukkel.fi.recipics.Tag> tags = db.getAllTags();
-        for (software.kuukkel.fi.recipics.Tag t: tags ) {
-            TagView tagGroup = (TagView) getView().findViewById(R.id.tag_group);
-            Tag tag = new Tag(t.getName());
-            tag.isDeletable = true;
-            tag.layoutColor = Color.parseColor(t.getColor());
-            //You can add one tag
-            tagGroup.addTag(tag);
-        }
-        //You can add multiple tag via ArrayList
-        //tagGroup.addTags();
-        //Via string array
-        //addTags(String[]tags);
-    }
-    private void prepareTags() {
-        tagList = new ArrayList<>();
-        JSONArray jsonArray;
-        JSONObject temp;
-        try {
-            jsonArray = new JSONArray(Constants.COUNTRIES);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                temp = jsonArray.getJSONObject(i);
-                tagList.add(new Tag("kukkuu"));
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 }

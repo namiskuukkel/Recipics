@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="software.kuukkel.fi.recipics.TagFragment"
+    android:gravity="center_vertical|center_horizontal">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tags_chosen"
+        android:id="@+id/chosenText"
+        android:layout_gravity="start" />
+
+
+    <com.cunoraz.tagview.TagView
+        android:id="@+id/chosen_tag_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp" >
+    </com.cunoraz.tagview.TagView>
+
+    <TextView
+        android:text="@string/tags_available"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tags" />
+
+    <com.cunoraz.tagview.TagView
+        android:id="@+id/tag_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp" />
+
+</LinearLayout>
+
