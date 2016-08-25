@@ -35,7 +35,7 @@ import java.util.Date;
 import static android.app.Activity.RESULT_OK;
 
 
-public class CameraActivity extends Fragment {
+public class CameraActivity extends Fragment implements View.OnClickListener {
 
     public final static String PATHS = "paths";
 
@@ -56,24 +56,22 @@ public class CameraActivity extends Fragment {
             // won't be displayed.  Note this is not needed -- we could
             // just run the code below, where we would create and return
             // the view hierarchy; it would just never be used.
-            fileUris = new ArrayList<>();
+
             return null;
         }
-        return (LinearLayout)inflater.inflate(R.layout.activity_camera, container, false);
+        fileUris = new ArrayList<>();
+        View mahView = inflater.inflate(R.layout.activity_camera, container, false);
+        Button pic = (Button) mahView.findViewById(R.id.new_picture);
+        pic.setOnClickListener(this);
+
+        return mahView;
     }
-    /*@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
-        fileUris = new ArrayList<Uri>();
-    }*/
 
-
-    public void startCamera(View view) {
+    public void onClick(View view) {
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
 
             checkPermissions();
             // Create the File where the photo should go
@@ -87,14 +85,12 @@ public class CameraActivity extends Fragment {
             // Continue only if the File was successfully created
             if (photoFile != null) {
 
-                mCurrentPhotoUri = FileProvider.getUriForFile(getActivity(),
-                        "software.kuukkel.fi.recipics.fileprovider",
+                mCurrentPhotoUri = FileProvider.getUriForFile(getActivity(), "software.kuukkel.fi.recipics.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         mCurrentPhotoUri);
 
                 //Log.d("Intent", takePictureIntent.getData().toString());
-                //TODO: IF the fucking intent null -_-
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
