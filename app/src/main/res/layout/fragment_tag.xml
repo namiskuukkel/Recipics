@@ -11,15 +11,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tags_chosen"
-        android:id="@+id/chosenText"
-        android:layout_gravity="start" />
+        android:id="@+id/chosenText" />
 
 
     <com.cunoraz.tagview.TagView
         android:id="@+id/chosen_tag_group"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp" >
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
     </com.cunoraz.tagview.TagView>
 
     <TextView

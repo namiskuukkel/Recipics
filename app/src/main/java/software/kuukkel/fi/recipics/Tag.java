@@ -11,6 +11,7 @@ public class Tag {
         DISH, INGREDIENT, ORIGIN, SWIFTNESS
     }
     private Type type;
+    private int position;
 
     public Tag( String name) {
         this.name = name;
@@ -50,4 +51,8 @@ public class Tag {
     public void setType(Type type) {
         this.type = type;
     }
+
+    public int getPosition() { return position; }
+
+    public void setPosition(int position) { this.position = position; }
 }

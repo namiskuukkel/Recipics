@@ -31,11 +31,23 @@ public class TagFragment extends Fragment {
         // Inflate the layout for this fragment
         mahView = inflater.inflate(R.layout.fragment_tag, container, false);
         addInitialTags();
+        chosenTagGroup = (TagView) mahView.findViewById(R.id.chosen_tag_group);
         //set click listener
         tagGroup.setOnTagClickListener(new OnTagClickListener() {
             @Override
             public void onTagClick(Tag tag, int position) {
                 tag.isDeletable = true;
+                tagGroup.remove(position);
+                chosenTagGroup.addTag(tag);
+            }
+        });
+        chosenTagGroup.setOnTagClickListener(new OnTagClickListener() {
+            @Override
+            public void onTagClick(Tag tag, int position) {
+                tag.isDeletable = false;
+                chosenTagGroup.remove(position);
+                //TODO: Put the tag back to where it was!
+                tagGroup.addTag(tag);
             }
         });
         return mahView;
@@ -45,8 +57,9 @@ public class TagFragment extends Fragment {
         DBHelper db = new DBHelper(getActivity());
         ArrayList<software.kuukkel.fi.recipics.Tag> tags = db.getAllTags();
         for (software.kuukkel.fi.recipics.Tag t: tags ) {
-            tagGroup = (TagView) mahView.findViewById(R.id.chosen_tag_group);
+            tagGroup = (TagView) mahView.findViewById(R.id.tag_group);
             Tag tag = new Tag(t.getName());
+            tag.isDeletable = false;
 
             tag.layoutColor = Color.parseColor(t.getColor());
             //You can add one tag
