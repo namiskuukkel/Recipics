@@ -8,4 +8,4 @@ Functionalities to be added:
 -Cooking mode
 -Add several pictures of one recipe to allow complicated, several page recipes to be saved
 -An awesome UI
--Back up 
+-Back up
