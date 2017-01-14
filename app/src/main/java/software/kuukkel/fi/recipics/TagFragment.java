@@ -1,27 +1,61 @@
 package software.kuukkel.fi.recipics;
 
+import android.support.v4.app.Fragment;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import com.cunoraz.tagview.OnTagClickListener;
 import com.cunoraz.tagview.TagView;
 import com.cunoraz.tagview.Tag;
-import com.cunoraz.tagview.Constants;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class TagFragment extends Fragment {
 
     private TagView chosenTagGroup;
     private TagView tagGroup;
-    private ArrayList< Tag > tagList;
     View mahView;
+    PreserveTags mCallback;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (PreserveTags) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnHeadlineSelectedListener");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        mCallback.SaveChosenTags(chosenTagGroup.getTags());
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mCallback.SaveChosenTags(chosenTagGroup.getTags());
+        Log.d("pause", "onPause");
+    }
+
+    @Override
+    public void onActivityCreated(Bundle state) {
+        super.onActivityCreated(state);
+        chosenTagGroup.addTags(mCallback.GetTags());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,22 +103,13 @@ public class TagFragment extends Fragment {
         //tagGroup.addTags();
         //Via string array
         //addTags(String[]tags);
+
+        Tag tag = new Tag("+ Add tag");
+        tag.isDeletable = false;
     }
 
-    private void prepareTags() {
-        tagList = new ArrayList<>();
-        JSONArray jsonArray;
-        JSONObject temp;
-        try {
-            jsonArray = new JSONArray(Constants.COUNTRIES);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                temp = jsonArray.getJSONObject(i);
-                tagList.add(new Tag("kukkuu"));
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public static interface PreserveTags {
+        public void SaveChosenTags(List<Tag> chosen);
+        public List<Tag> GetTags();
     }
 }

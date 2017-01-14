@@ -1,46 +1,23 @@
 package software.kuukkel.fi.recipics;
 
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
-import android.view.View;
 
 /**
  * The <code>ViewPagerFragmentActivity</code> class is the fragment activity hosting the ViewPager
  * @author mwho
  */
-public class ViewPagerFragmentActivity extends FragmentActivity{
-    public final static String PATHS = "paths";
+public class ViewPagerFragmentActivity extends FragmentActivity
+        implements TagFragment.PreserveTags, CameraFragment.PreserveFilepaths {
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_TAKE_PHOTO = 1;
-    static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 42;
-    private String mCurrentPhotoPath;
-    private Uri mCurrentPhotoUri;
-    private ArrayList<Uri> fileUris;
+    List<com.cunoraz.tagview.Tag> chosenTags;
+    Recipe recipe;
     /** maintains the pager adapter*/
     private PagerAdapter mPagerAdapter;
     /* (non-Javadoc)
@@ -52,6 +29,8 @@ public class ViewPagerFragmentActivity extends FragmentActivity{
         super.setContentView(R.layout.fragment_view_pager);
         //initialsie the pager
         this.initialisePaging();
+
+        recipe = new Recipe();
     }
 
     /**
@@ -60,7 +39,7 @@ public class ViewPagerFragmentActivity extends FragmentActivity{
     private void initialisePaging() {
 
         List<Fragment> fragments = new Vector<Fragment>();
-        fragments.add(Fragment.instantiate(this, CameraActivity.class.getName()));
+        fragments.add(Fragment.instantiate(this, CameraFragment.class.getName()));
         fragments.add(Fragment.instantiate(this, RecipeDetailsFillActivity.class.getName()));
         fragments.add(Fragment.instantiate(this, TagFragment.class.getName()));
         this.mPagerAdapter  = new PagerAdapter(super.getSupportFragmentManager(), fragments);
@@ -68,4 +47,17 @@ public class ViewPagerFragmentActivity extends FragmentActivity{
         ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);
         pager.setAdapter(this.mPagerAdapter);
     }
+
+    public void SaveChosenTags(List<com.cunoraz.tagview.Tag> chosen) {
+        chosenTags = chosen;
+    }
+
+    public List<com.cunoraz.tagview.Tag> GetTags() {
+        return chosenTags;
+    }
+
+    public void savePictureFilepaths(ArrayList<String> path) { recipe.setPathsToPictures(path); }
+
+    public ArrayList<String> getPictureFilepaths() { return recipe.getPathsToPictures(); }
+
 }

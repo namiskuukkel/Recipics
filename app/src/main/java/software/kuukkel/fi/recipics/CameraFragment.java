@@ -1,6 +1,7 @@
 package software.kuukkel.fi.recipics;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -32,7 +33,7 @@ import java.util.Date;
 import static android.app.Activity.RESULT_OK;
 
 
-public class CameraActivity extends Fragment implements View.OnClickListener {
+public class CameraFragment extends Fragment implements View.OnClickListener {
 
     public final static String PATHS = "paths";
 
@@ -43,8 +44,25 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
     private Uri mCurrentPhotoUri;
     private ArrayList<Uri> fileUris;
 
+    private PreserveFilepaths mCallback;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (PreserveFilepaths) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnHeadlineSelectedListener");
+        }
+    }
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState); // Always call the superclass first
         if (container == null) {
             // We have different layouts, and in one of them this
             // fragment's containing frame doesn't exist.  The fragment
@@ -56,10 +74,24 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
 
             return null;
         }
+
+        // Check whether we're recreating a previously destroyed instance
+        if (savedInstanceState != null) {
+            if(mCallback.getPictureFilepaths().size() != 0) {
+                ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
+                File imgFile = new File(mCallback.getPictureFilepaths().get(0));
+                if (imgFile.exists()) {
+                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    //Drawable d = new BitmapDrawable(getResources(), myBitmap);
+                    mImageView.setImageBitmap(myBitmap);
+                }
+            }
+
+        }
+
         fileUris = new ArrayList<>();
         View mahView = inflater.inflate(R.layout.fragment_camera, container, false);
         mahView.findViewById(R.id.newPicture).setOnClickListener(this);
-        mahView.findViewById(R.id.nextButton).setOnClickListener(this);
 
         return mahView;
     }
@@ -67,9 +99,6 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         if(view.getId() == R.id.newPicture) {
             startCamera(view);
-        }
-        else if(view.getId() == R.id.nextButton){
-            startDetailFill(view);
         }
     }
 
@@ -107,39 +136,61 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
             fileUris.add(mCurrentPhotoUri);
             galleryAddPic();
 
+            Matrix matrix = new Matrix();
+            Bitmap resized = getPreview(mCurrentPhotoUri);
             try {
                 ExifInterface exif = new ExifInterface(mCurrentPhotoUri.getPath());
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.d("st", ex.getMessage());
-            }
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
+                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-            Bitmap resized = getPreview(mCurrentPhotoUri);
-            //Bitmap rotatedBitmap = Bitmap.createBitmap(resized, 0, 0, resized.getWidth(),
-            //        resized.getHeight(), matrix, true);
+                int rotationInDegrees = exifToDegrees(rotation);
+
+                if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
+            } catch (Exception e) {
+                Log.d("ex", e.toString());
+            }
 
             ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
-            mImageView.setImageBitmap(resized);
-
-            Button next = (Button) getView().findViewById(R.id.nextButton);
-            next.setVisibility(View.VISIBLE);
+            mImageView.setImageBitmap(Bitmap.createBitmap(resized, 0, 0, resized.getWidth(),
+                    resized.getHeight(), matrix, true));
         }
     }
-
-    public void startDetailFill(View view) {
-
-        RecipeDetailsFillActivity nextFrag= new RecipeDetailsFillActivity();
-        /*Bundle bundle = new Bundle();
-        bundle.putUr(PATHS, fileUris);
-        nextFrag.setArguments(bundle);*/
-        this.getFragmentManager().beginTransaction()
-                .replace(R.id.viewpager, nextFrag, null)
-                .addToBackStack(null)
-                .commit();
+    @Override
+    public void onPause() {
+        super.onPause();
+        ArrayList<String> filePaths = new ArrayList<>();
+        for (Uri fileUri : fileUris) {
+            filePaths.add(fileUri.getPath());
+        }
+        mCallback.savePictureFilepaths(filePaths);
+        Log.d("pause", "onPause");
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("pause", "onResume");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("pause", "onStart");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("pause", "onStop");
+    }
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        ArrayList<String> filePaths = null;
+        for (Uri fileUri : fileUris) {
+            filePaths.add(fileUri.getPath());
+        }
+        savedInstanceState.putStringArrayList("paths", filePaths);
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -154,6 +205,11 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("destroy", "onDestroy");
     }
 
     private void galleryAddPic() {
@@ -297,5 +353,17 @@ public class CameraActivity extends Fragment implements View.OnClickListener {
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    private static int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) { return 90; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
+        return 0;
+    }
+
+    public static interface PreserveFilepaths {
+        public void savePictureFilepaths(ArrayList<String> path);
+        public ArrayList<String> getPictureFilepaths();
     }
 }

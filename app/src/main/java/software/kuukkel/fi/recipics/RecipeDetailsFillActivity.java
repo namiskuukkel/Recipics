@@ -1,21 +1,10 @@
 package software.kuukkel.fi.recipics;
 
 import android.support.v4.app.Fragment;
-import android.graphics.Color;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import com.cunoraz.tagview.OnTagClickListener;
-import com.cunoraz.tagview.TagView;
-import com.cunoraz.tagview.Tag;
-import com.cunoraz.tagview.Constants;
 
 public class RecipeDetailsFillActivity extends Fragment {
 
