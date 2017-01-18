@@ -21,6 +21,7 @@ public class Recipe {
     public Recipe() {}
 
     public Recipe( int id, String name, ArrayList<String> pathsToPictures, String notes, Boolean starred) {
+        pathsToPictures = new ArrayList<>();
         this.id = id;
         this.name = name;
         this.pathsToPictures = pathsToPictures;

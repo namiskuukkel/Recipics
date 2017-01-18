@@ -1,9 +1,11 @@
 package software.kuukkel.fi.recipics;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -77,7 +79,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
 
         // Check whether we're recreating a previously destroyed instance
         if (savedInstanceState != null) {
-            if(mCallback.getPictureFilepaths().size() != 0) {
+            if(mCallback.getPictureFilepaths() != null ) {
                 ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
                 File imgFile = new File(mCallback.getPictureFilepaths().get(0));
                 if (imgFile.exists()) {
@@ -119,8 +121,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             // Continue only if the File was successfully created
             if (photoFile != null) {
 
-                mCurrentPhotoUri = FileProvider.getUriForFile(getActivity(), "software.kuukkel.fi.recipics.fileprovider",
-                        photoFile);
+                mCurrentPhotoUri = Uri.fromFile(photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         mCurrentPhotoUri);
 
@@ -136,24 +137,29 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             fileUris.add(mCurrentPhotoUri);
             galleryAddPic();
 
-            Matrix matrix = new Matrix();
-            Bitmap resized = getPreview(mCurrentPhotoUri);
+            //TODO: Vertical pictures won't show vertical. Whyyyy?!
+
             try {
-                ExifInterface exif = new ExifInterface(mCurrentPhotoUri.getPath());
-                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
 
-                int rotationInDegrees = exifToDegrees(rotation);
+                // bimatp factory
+                BitmapFactory.Options options = new BitmapFactory.Options();
 
-                if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
-            } catch (Exception e) {
-                Log.d("ex", e.toString());
+                // downsizing image as it throws OutOfMemory Exception for larger
+                // images
+                options.inSampleSize = 4;
+
+                final Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoUri.getPath(),
+                        options);
+
+                mImageView.setImageBitmap(bitmap);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
-
-            ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
-            mImageView.setImageBitmap(Bitmap.createBitmap(resized, 0, 0, resized.getWidth(),
-                    resized.getHeight(), matrix, true));
         }
     }
+
+    //Debugging to see how lifecycle events act
     @Override
     public void onPause() {
         super.onPause();
@@ -162,28 +168,37 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             filePaths.add(fileUri.getPath());
         }
         mCallback.savePictureFilepaths(filePaths);
-        Log.d("pause", "onPause");
+        Log.d("pause", "onPause: Camera");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("pause", "onResume");
+        Log.d("pause", "onResume: Camera");
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("pause", "onStart");
+        Log.d("pause", "onStart: Camera");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("pause", "onStop");
+        Log.d("pause", "onStop: Camera");
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("destroy", "onDestroy: Camera");
+    }
+
+    //Save URIs to pictures taken, or they will be lost on fragment destruction
+    //TODO: This doesn't work
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        ArrayList<String> filePaths = null;
+        ArrayList<String> filePaths = new ArrayList<>();
         for (Uri fileUri : fileUris) {
             filePaths.add(fileUri.getPath());
         }
@@ -191,27 +206,43 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
 
         super.onSaveInstanceState(savedInstanceState);
     }
+
+    //Create a file where the picture to be taken will be saved
+    //http://www.androidhive.info/2013/09/android-working-with-camera-api/
     private File createImageFile() throws IOException {
+
+        String dirName = "Recipics";
+        // External sdcard location
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                dirName);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d(dirName, "Oops! Failed create "
+                        + dirName + " directory");
+                return null;
+            }
+        }
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
-                storageDir      /* directory */
+                mediaStorageDir      /* directory */
         );
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("destroy", "onDestroy");
-    }
 
+
+    //Trigger the phone's gallery to show the new picture
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         File f = new File(mCurrentPhotoPath);
@@ -220,71 +251,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         getActivity().sendBroadcast(mediaScanIntent);
     }
 
-    private Bitmap getPreview(Uri uri) {
-
-        InputStream in = null;
-        try {
-            final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
-            in = getContext().getContentResolver().openInputStream(uri);
-
-            // Decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(in, null, o);
-            try {
-                in.close();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.d("st", ex.getMessage());
-            }
-
-
-            int scale = 1;
-            while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) >
-                    IMAGE_MAX_SIZE) {
-                scale++;
-            }
-            Log.d("", "scale = " + scale + ", orig-width: " + o.outWidth + ", orig-height: " + o.outHeight);
-
-            Bitmap b = null;
-            in = getActivity().getContentResolver().openInputStream(uri);
-            if (scale > 1) {
-                scale--;
-                // scale to max possible inSampleSize that still yields an image
-                // larger than target
-                o = new BitmapFactory.Options();
-                o.inSampleSize = scale;
-                b = BitmapFactory.decodeStream(in, null, o);
-
-                // resize to desired dimensions
-                int height = b.getHeight();
-                int width = b.getWidth();
-                Log.d("", "1th scale operation dimenions - width: " + width + ", height: " + height);
-
-                double y = Math.sqrt(IMAGE_MAX_SIZE
-                        / (((double) width) / height));
-                double x = (y / height) * width;
-
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(b, (int) x,
-                        (int) y, true);
-                b.recycle();
-                b = scaledBitmap;
-
-                System.gc();
-            } else {
-                b = BitmapFactory.decodeStream(in);
-            }
-            in.close();
-
-            Log.d("", "bitmap size - width: " + b.getWidth() + ", height: " +
-                    b.getHeight());
-            return b;
-        } catch (IOException e) {
-            Log.e("", e.getMessage(), e);
-            return null;
-        }
-    }
-
+    //For new versions of android: Ask for application permissions on runtime
     public void checkPermissions() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(getActivity(),
@@ -353,13 +320,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             // other 'case' lines to check for other
             // permissions this app might request
         }
-    }
-
-    private static int exifToDegrees(int exifOrientation) {
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) { return 90; }
-        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
-        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
-        return 0;
     }
 
     public static interface PreserveFilepaths {

@@ -19,10 +19,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
         checkFirstRun();
-        /*DBHelper db = new DBHelper(this);
+        DBHelper db = new DBHelper(this);
+
+        /*db.chickenDestroy();
+
         Tag[] defaultTags = HerperClass.createDefaultTags();
-        db.insertDefaultTags(defaultTags);
-        /*db.chickenDestroy();*/
+        db.insertDefaultTags(defaultTags);*/
 
         Button newButton= (Button) findViewById(R.id.newButton);
         newButton.setOnClickListener(new View.OnClickListener() {

@@ -112,6 +112,7 @@ public class DBHelper extends SQLiteOpenHelper {
             Log.d("Db ex", ex.toString());
         } finally {
             db.endTransaction();
+            db.close();
         }
         return true;
     }
@@ -119,16 +120,18 @@ public class DBHelper extends SQLiteOpenHelper {
     public Cursor getRecipe(int id){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from " + RecipeEntry.RECIPES_TABLE_NAME + "where id="+id+"", null );
+        db.close();
         return res;
     }
 
     public int numberOfRows(){
         SQLiteDatabase db = this.getReadableDatabase();
         int numRows = (int) DatabaseUtils.queryNumEntries(db, RecipeEntry.RECIPES_TABLE_NAME);
+        db.close();
         return numRows;
     }
 
-    public boolean updateContact (Integer id, String name, String phone, String email, String street,String place)
+    /*public boolean updateContact (Integer id, String name, String phone, String email, String street,String place)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -138,8 +141,9 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put("street", street);
         contentValues.put("place", place);
         db.update("contacts", contentValues, "id = ? ", new String[] { Integer.toString(id) } );
+        db.close();
         return true;
-    }
+    }*/
 
     public Integer deleteRecipe (Integer id)
     {
@@ -161,6 +165,7 @@ public class DBHelper extends SQLiteOpenHelper {
             array_list.add(res.getString(res.getColumnIndex(RecipeEntry.RECIPES_COLUMN_NAME)));
             res.moveToNext();
         }
+        db.close();
         return array_list;
     }
 
@@ -177,6 +182,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_COLOR))));
             res.moveToNext();
         }
+        db.close();
         return array_list;
     }
 
@@ -187,14 +193,25 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update("contacts", contentValues, "id = ? ", new String[] { Integer.toString(5) } );
 
     }
-
+    //TODO: Insert tag; check that a tag with the new tag name doesn't already exist
     public void insertDefaultTags(Tag[] tags){
         SQLiteDatabase db = this.getWritableDatabase();
-        for ( Tag tag : tags) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(TagEntry.TAGS_COLUMN_NAME, tag.getName());
-            contentValues.put(TagEntry.TAGS_COLUMN_COLOR, tag.getColor());
-            long id = db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
+
+        try {
+            db.beginTransaction();
+            for ( Tag tag : tags) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(TagEntry.TAGS_COLUMN_NAME, tag.getName());
+                contentValues.put(TagEntry.TAGS_COLUMN_COLOR, tag.getColor());
+                long id = db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
+            }
+            db.setTransactionSuccessful();
+        } catch(Exception ex ) {
+            Log.d("Db ex", ex.toString());
+        } finally {
+            db.endTransaction();
+            db.close();
         }
+        db.close();
     }
 }

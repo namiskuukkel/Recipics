@@ -1,58 +1,55 @@
 package software.kuukkel.fi.recipics;
 
+import android.graphics.Color;
+
 /**
  * Created by namiskuukkel on 7.6.2016.
  */
 public class Tag {
-    private String name;
-    //Tag may have a color at some point
-    private String color;
+    private com.cunoraz.tagview.Tag tag;
+    String color;
+    //Todo: Add type functionality (same type tags get grouped etc)
     public enum Type {
         DISH, INGREDIENT, ORIGIN, SWIFTNESS
     }
     private Type type;
-    private int position;
 
-    public Tag( String name) {
-        this.name = name;
+    public Tag(String name) {
+        tag = new com.cunoraz.tagview.Tag(name);
+        tag.isDeletable = false;
     }
 
-    public Tag( String name, String color) {
-        this.name = name;
+    public Tag(String name, String color) {
+        tag = new com.cunoraz.tagview.Tag(name);
+        tag.isDeletable = false;
         this.color = color;
+        tag.layoutColor = Color.parseColor(color);
     }
 
-    public Tag( String name, String color, Type type) {
-        this.name = name;
+    public Tag(String name, String color, Type type) {
+        tag = new com.cunoraz.tagview.Tag(name);
+        tag.isDeletable = false;
         this.color = color;
+        tag.layoutColor = Color.parseColor(color);
         this.type = type;
     }
 
     public String getName() {
-        return name;
+        return tag.text;
     }
 
     public void setName(String name) {
-        this.name = name;
+        tag.text = name;
     }
 
-    public String getColor() {
-        return color;
-    }
+    public String getColor() { return this.color; }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
+    public com.cunoraz.tagview.Tag getTag() { return tag; }
 
-    public Type getType() {
-        return type;
-    }
+    public void setTag(com.cunoraz.tagview.Tag tag ) { this.tag = tag;}
 
     public void setType(Type type) {
         this.type = type;
     }
 
-    public int getPosition() { return position; }
-
-    public void setPosition(int position) { this.position = position; }
 }

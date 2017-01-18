@@ -25,7 +25,7 @@ public class DBConst {
     }
 
     public static final String CREATE_TABLE_RECIPES = "create table " + RecipeEntry.RECIPES_TABLE_NAME +
-            " (" + RecipeEntry._ID + NUMBER_TYPE + " primary key" + COMMA_SEP
+            " (" + RecipeEntry._ID + NUMBER_TYPE + " primary key autoincrement" + COMMA_SEP
             + RecipeEntry.RECIPES_COLUMN_NAME + TEXT_TYPE + COMMA_SEP +
             RecipeEntry.RECIPES_COLUMN_NOTES + TEXT_TYPE + COMMA_SEP +
             RecipeEntry.RECIPES_COLUMN_STARRED + NUMBER_TYPE + COMMA_SEP +
@@ -52,7 +52,7 @@ public class DBConst {
     }
 
     public static final String CREATE_TABLE_PATHS = "create table " + PathEntry.PATHS_TABLE_NAME +
-            " (" + PathEntry._ID + NUMBER_TYPE + " primary key" + COMMA_SEP +
+            " (" + PathEntry._ID + NUMBER_TYPE + " primary key autoincrement" + COMMA_SEP +
             PathEntry.PATHS_COLUMN_PATH + ")";
 
 

@@ -12,10 +12,12 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+//See https://android-arsenal.com/details/1/2566 for TagView
 import com.cunoraz.tagview.OnTagClickListener;
 import com.cunoraz.tagview.TagView;
 import com.cunoraz.tagview.Tag;
 
+//TODO: At which lifecycle phase should the chosen tags be saved to parent activity?
 public class TagFragment extends Fragment {
 
     private TagView chosenTagGroup;
@@ -39,7 +41,7 @@ public class TagFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        mCallback.SaveChosenTags(chosenTagGroup.getTags());
+        //mCallback.SaveChosenTags(chosenTagGroup.getTags());
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -47,14 +49,23 @@ public class TagFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mCallback.SaveChosenTags(chosenTagGroup.getTags());
-        Log.d("pause", "onPause");
+        mCallback.SaveChosenTags(chosenTagGroup.getTags(), tagGroup.getTags());
+        Log.d("pause", "onPause: Tag");
     }
 
     @Override
     public void onActivityCreated(Bundle state) {
         super.onActivityCreated(state);
-        chosenTagGroup.addTags(mCallback.GetTags());
+        if(state != null ) {
+            Log.d("bundle", "Now it wasn't null");
+        }
+        /*List<List<Tag>> tags = mCallback.GetTags();
+        if(tags != null) {
+            if(tags.get(0) != null && tags.get(1) != null) {
+                chosenTagGroup.addTags(tags.get(0));
+                tagGroup.addTags(tags.get(1));
+            }
+        }*/
     }
 
     @Override
@@ -62,10 +73,17 @@ public class TagFragment extends Fragment {
                              Bundle savedInstanceState) {
         tagGroup = new TagView(getActivity());
         chosenTagGroup = new TagView(getActivity());
+
         // Inflate the layout for this fragment
         mahView = inflater.inflate(R.layout.fragment_tag, container, false);
-        addInitialTags();
+
+        if(savedInstanceState != null ) {
+            Log.d("bundle", "Now it wasn't null");
+        }
+
+        tagGroup = (TagView) mahView.findViewById(R.id.tag_group);
         chosenTagGroup = (TagView) mahView.findViewById(R.id.chosen_tag_group);
+
         //set click listener
         tagGroup.setOnTagClickListener(new OnTagClickListener() {
             @Override
@@ -84,32 +102,31 @@ public class TagFragment extends Fragment {
                 tagGroup.addTag(tag);
             }
         });
+
+        List<List<Tag>> tags = mCallback.GetTags();
+        if(tags != null) {
+            if(tags.get(0) != null && tags.get(1) != null) {
+                for(Tag t: tags.get(0)) {
+                    chosenTagGroup.addTag(t);
+                }
+                for(Tag t: tags.get(1)) {
+                    tagGroup.addTag(t);
+                }
+            }
+        }
+        /*TODO: Add this somewhere smart. This should open a view where the user can add a new tag,
+         name it, give it a type and a possible parent tag*/
+        /*Tag tag = new Tag("+ Add tag");
+        tag.isDeletable = false;
+        tagGroup.addTag(tag);*/
+
         return mahView;
     }
 
-    private void addInitialTags() {
-        DBHelper db = new DBHelper(getActivity());
-        ArrayList<software.kuukkel.fi.recipics.Tag> tags = db.getAllTags();
-        for (software.kuukkel.fi.recipics.Tag t: tags ) {
-            tagGroup = (TagView) mahView.findViewById(R.id.tag_group);
-            Tag tag = new Tag(t.getName());
-            tag.isDeletable = false;
-
-            tag.layoutColor = Color.parseColor(t.getColor());
-            //You can add one tag
-            tagGroup.addTag(tag);
-        }
-        //You can add multiple tag via ArrayList
-        //tagGroup.addTags();
-        //Via string array
-        //addTags(String[]tags);
-
-        Tag tag = new Tag("+ Add tag");
-        tag.isDeletable = false;
-    }
-
+    /*Interface to save tags chosen by the user when fragment is killed and to get them back once
+    fragment continues */
     public static interface PreserveTags {
-        public void SaveChosenTags(List<Tag> chosen);
-        public List<Tag> GetTags();
+        public void SaveChosenTags(List<Tag> chosen, List<Tag> notChosen);
+        public List<List<Tag>> GetTags();
     }
 }
