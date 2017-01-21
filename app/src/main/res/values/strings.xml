@@ -5,7 +5,8 @@
     <string name="new_picture">Take a new picture</string>
     <string name="recipeName">Recipe name (required)</string>
     <string name="notes">Notes about this recipe</string>
-    <string name="source">Recipe source</string>s
+    <string name="source">Recipe source</string>
+    <string name="starred">This is a favorite recipe</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="hint_recipe_name">Banana Bread</string>
     <string name="hint_notes">Bake for 10min only</string>

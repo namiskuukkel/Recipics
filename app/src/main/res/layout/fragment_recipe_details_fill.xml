@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="software.kuukkel.fi.recipics.RecipeDetailsFillActivity"
+    tools:context="software.kuukkel.fi.recipics.RecipeDetailsFillFragment"
     android:gravity="center_vertical|center_horizontal">
 
 
@@ -50,5 +50,11 @@
         android:id="@+id/editSource"
         android:layout_gravity="center_horizontal"
         android:hint="@string/hint_source" />
+
+    <CheckBox
+        android:text="@string/starred"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/starred" />
 
 </LinearLayout>

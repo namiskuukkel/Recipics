@@ -46,7 +46,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     private Uri mCurrentPhotoUri;
     private ArrayList<Uri> fileUris;
 
-    private PreserveFilepaths mCallback;
+    private PreserveFileUris mCallback;
 
     @Override
     public void onAttach(Context context) {
@@ -55,7 +55,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mCallback = (PreserveFilepaths) context;
+            mCallback = (PreserveFileUris) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement OnHeadlineSelectedListener");
@@ -77,23 +77,32 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             return null;
         }
 
-        // Check whether we're recreating a previously destroyed instance
-        if (savedInstanceState != null) {
-            if(mCallback.getPictureFilepaths() != null ) {
-                ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
-                File imgFile = new File(mCallback.getPictureFilepaths().get(0));
-                if (imgFile.exists()) {
-                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    //Drawable d = new BitmapDrawable(getResources(), myBitmap);
-                    mImageView.setImageBitmap(myBitmap);
-                }
-            }
-
-        }
-
-        fileUris = new ArrayList<>();
         View mahView = inflater.inflate(R.layout.fragment_camera, container, false);
         mahView.findViewById(R.id.newPicture).setOnClickListener(this);
+
+        //FileUri array is initialised when the parent activity is created. Hence, this works both
+        //on the first time as well as the latter times
+        fileUris = mCallback.getPictureUris();
+        //If the array isn't empty, we are returning to this fragment and there is already a picture
+        //to show
+        if(fileUris.size() > 0 ) {
+            ImageView mImageView = (ImageView) mahView.findViewById(R.id.capturedImageview);
+            if (fileUris.get(0) != null ) {
+                // bimatp factory
+                BitmapFactory.Options options = new BitmapFactory.Options();
+
+                // downsizing image as it throws OutOfMemory Exception for larger
+                // images
+                options.inSampleSize = 4;
+
+                final Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoUri.getPath(),
+                        options);
+
+                mImageView.setImageBitmap(bitmap);
+            }
+        }
+
+
 
         return mahView;
     }
@@ -109,6 +118,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
 
+            //Check if the user has already accepted the permissions for memory accesses
             checkPermissions();
             // Create the File where the photo should go
             File photoFile = null;
@@ -125,7 +135,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         mCurrentPhotoUri);
 
-                //Log.d("Intent", takePictureIntent.getData().toString());
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
@@ -138,7 +147,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             galleryAddPic();
 
             //TODO: Vertical pictures won't show vertical. Whyyyy?!
-
             try {
                 ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
 
@@ -163,48 +171,8 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         super.onPause();
-        ArrayList<String> filePaths = new ArrayList<>();
-        for (Uri fileUri : fileUris) {
-            filePaths.add(fileUri.getPath());
-        }
-        mCallback.savePictureFilepaths(filePaths);
+        mCallback.savePictureUris(fileUris);
         Log.d("pause", "onPause: Camera");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("pause", "onResume: Camera");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d("pause", "onStart: Camera");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d("pause", "onStop: Camera");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("destroy", "onDestroy: Camera");
-    }
-
-    //Save URIs to pictures taken, or they will be lost on fragment destruction
-    //TODO: This doesn't work
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        ArrayList<String> filePaths = new ArrayList<>();
-        for (Uri fileUri : fileUris) {
-            filePaths.add(fileUri.getPath());
-        }
-        savedInstanceState.putStringArrayList("paths", filePaths);
-
-        super.onSaveInstanceState(savedInstanceState);
     }
 
     //Create a file where the picture to be taken will be saved
@@ -322,8 +290,13 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public static interface PreserveFilepaths {
-        public void savePictureFilepaths(ArrayList<String> path);
-        public ArrayList<String> getPictureFilepaths();
+    //This method is for the parent activity to get the fileuris, when user presses the save button
+    public ArrayList<Uri> getPictureUris() {
+        return fileUris;
+    }
+
+    public static interface PreserveFileUris {
+        public void savePictureUris(ArrayList<Uri> path);
+        public ArrayList<Uri> getPictureUris();
     }
 }

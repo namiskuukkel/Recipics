@@ -63,31 +63,29 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_TABLE + RecipeToTagEntry.RECIPETOTAG_TABLE_NAME);
         onCreate(db);
     }
-    public boolean insertRecipe  (String name, String[] paths, String notes, Boolean starred,
-                                  String source, String[] tags)
+    public boolean insertRecipe (Recipe recipe, ArrayList<Tag> tags)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         try {
 
             ContentValues RecipeContentValues = new ContentValues();
-            RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_NAME, name);
-            if(notes != "") {
-                RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_NOTES, notes);
-            }
+            RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_NAME, recipe.getName());
+            RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_NOTES, recipe.getNotes());
+
             //SQLite as no boolean
             int starredInt = 0;
-            if(starred) {
+            if(recipe.isStarred()) {
                 starredInt = 1;
             }
             RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_STARRED, starredInt);
-            if(source != "") {
-                RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_SOURCE, source);
-            }
+
+            RecipeContentValues.put(RecipeEntry.RECIPES_COLUMN_SOURCE, recipe.getSource());
+
             long recipeId = db.insert(RecipeEntry.RECIPES_TABLE_NAME, null, RecipeContentValues);
 
             ArrayList<Long> pathIds = new ArrayList<Long>();
-            for (String path: paths) {
+            for (String path: recipe.getFilePaths()) {
                 ContentValues PathContentValues = new ContentValues();
                 PathContentValues.put(PathEntry.PATHS_COLUMN_PATH, path);
                 pathIds.add(db.insert(PathEntry.PATHS_TABLE_NAME, null, PathContentValues));
@@ -95,17 +93,18 @@ public class DBHelper extends SQLiteOpenHelper {
 
             for (long pathId : pathIds) {
                 ContentValues RecipeToPathsValues = new ContentValues();
-                RecipeToPathsValues.put(RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID, recipeId);
                 RecipeToPathsValues.put(RecipeToPathEntry.RECIPETOPATH_COLUMN_PATHID, pathId);
+                RecipeToPathsValues.put(RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID, recipeId);
                 db.insert(RecipeToPathEntry.RECIPETOPATH_TABLE_NAME, null, RecipeToPathsValues);
             }
 
             //TODO Should be tag objects
             ArrayList<Long> tagIds = new ArrayList();
-            for (String tag: tags) {
-                ContentValues TagContentValues = new ContentValues();
-                TagContentValues.put(TagEntry.TAGS_COLUMN_NAME, tag);
-                tagIds.add(db.insert(PathEntry.PATHS_TABLE_NAME, null, TagContentValues));
+            for (Tag tag: tags) {
+                ContentValues RecipeTagContentValues = new ContentValues();
+                RecipeTagContentValues.put(RecipeToTagEntry.RECIPETOTAG_COLUMN_RECIPEID, recipeId);
+                RecipeTagContentValues.put(RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGID, tag.getName());
+                tagIds.add(db.insert(RecipeToTagEntry.RECIPETOTAG_TABLE_NAME, null, RecipeTagContentValues));
             }
             db.setTransactionSuccessful();
         } catch(Exception ex ) {

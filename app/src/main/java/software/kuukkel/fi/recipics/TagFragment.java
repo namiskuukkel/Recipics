@@ -40,13 +40,6 @@ public class TagFragment extends Fragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        //mCallback.SaveChosenTags(chosenTagGroup.getTags());
-        // Always call the superclass so it can save the view hierarchy state
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         mCallback.SaveChosenTags(chosenTagGroup.getTags(), tagGroup.getTags());
@@ -121,6 +114,10 @@ public class TagFragment extends Fragment {
         tagGroup.addTag(tag);*/
 
         return mahView;
+    }
+
+    public List<Tag> getChosenTags() {
+        return chosenTagGroup.getTags();
     }
 
     /*Interface to save tags chosen by the user when fragment is killed and to get them back once

@@ -6,10 +6,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class RecipeDetailsFillActivity extends Fragment {
+public class RecipeDetailsFillFragment extends Fragment {
 
 
     View mahView;
@@ -34,13 +35,11 @@ public class RecipeDetailsFillActivity extends Fragment {
 
     public Recipe getRecipe() {
         Recipe recipe = new Recipe();
-        Context context = getActivity();
-        CharSequence text = "Hello toast!";
-        int duration = Toast.LENGTH_LONG;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
         recipe.setName(((EditText) getView().findViewById(R.id.editName)).getText().toString());
+        recipe.setNotes(((EditText) getView().findViewById(R.id.editNotes)).getText().toString());
+        recipe.setSource(((EditText) getView().findViewById(R.id.editSource)).getText().toString());
+        recipe.setStarred(((CheckBox) getView().findViewById(R.id.starred)).isChecked());
+
         return recipe;
     }
 }

@@ -19,6 +19,11 @@ public class Tag {
         tag.isDeletable = false;
     }
 
+    //Todo: This is on temporary to test the recipe saving with db
+    public Tag(com.cunoraz.tagview.Tag tag) {
+        this.tag = tag;
+    }
+
     public Tag(String name, String color) {
         tag = new com.cunoraz.tagview.Tag(name);
         tag.isDeletable = false;

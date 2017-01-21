@@ -43,7 +43,6 @@ public class DBConst {
             " (" + TagEntry.TAGS_COLUMN_NAME + TEXT_TYPE + " primary key" + COMMA_SEP
             + TagEntry.TAGS_COLUMN_COLOR + TEXT_TYPE + ")";
 
-
     public static abstract class PathEntry implements BaseColumns {
         public static final String PATHS_TABLE_NAME = "paths";
         //TODO: Is this required?
@@ -66,7 +65,8 @@ public class DBConst {
 
     public static final String CREATE_TABLE_RECIPETOTAG = "create table " +
             RecipeToTagEntry.RECIPETOTAG_TABLE_NAME + " (" + RecipeToTagEntry._ID +
-            RecipeToTagEntry.RECIPETOTAG_COLUMN_RECIPEID + NUMBER_TYPE + ")";
+            RecipeToTagEntry.RECIPETOTAG_COLUMN_RECIPEID + NUMBER_TYPE + COMMA_SEP +
+            RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGID + TEXT_TYPE + ")";
 
     public static abstract class RecipeToPathEntry implements BaseColumns {
         public static final String RECIPETOPATH_TABLE_NAME = "RecipeToPath";
@@ -78,5 +78,6 @@ public class DBConst {
 
     public static final String CREATE_TABLE_RECIPETOPATH = "create table " +
             RecipeToPathEntry.RECIPETOPATH_TABLE_NAME + " (" + RecipeToPathEntry._ID +
-            RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID + NUMBER_TYPE + ")";
+            RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID + NUMBER_TYPE + COMMA_SEP +
+            RecipeToPathEntry.RECIPETOPATH_COLUMN_PATHID + NUMBER_TYPE + ")";
 }
