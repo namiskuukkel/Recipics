@@ -21,7 +21,9 @@ public class Recipe {
     private String source = "";
     private ArrayList<Tag> tags;
 
-    public Recipe() {}
+    public Recipe() {
+        pictureUris = new ArrayList<>();
+    }
 
     public Recipe( int id, String name, ArrayList<Uri> pictureUris, String notes, Boolean starred) {
         this.id = id;
@@ -51,6 +53,12 @@ public class Recipe {
     public ArrayList<Uri> getPictureUris() { return pictureUris; }
 
     public void setPictureUris(ArrayList<Uri> uris) { pictureUris = uris; }
+
+    public void setUrisFromPaths(ArrayList<String> paths) {
+        for(String path: paths) {
+            pictureUris.add(Uri.fromFile(new File(path)));
+        }
+    }
 
     public ArrayList<String> getFilePaths() {
         ArrayList<String> paths = new ArrayList<>();

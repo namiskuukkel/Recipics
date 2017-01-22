@@ -123,6 +123,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return res;
     }
 
+
     public int numberOfRows(){
         SQLiteDatabase db = this.getReadableDatabase();
         int numRows = (int) DatabaseUtils.queryNumEntries(db, RecipeEntry.RECIPES_TABLE_NAME);
@@ -152,20 +153,45 @@ public class DBHelper extends SQLiteOpenHelper {
                 new String[] { Integer.toString(id) });
     }
 
-    public ArrayList<String> getAllRecipes()
+    public ArrayList<Recipe> getAllRecipes()
     {
-        ArrayList<String> array_list = new ArrayList<String>();
+        ArrayList<Recipe> recipes = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from  " + RecipeEntry.RECIPES_TABLE_NAME, null );
+        Cursor res =  db.rawQuery( "SELECT * FROM  " + RecipeEntry.RECIPES_TABLE_NAME, null );
         res.moveToFirst();
 
         while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(RecipeEntry.RECIPES_COLUMN_NAME)));
+            Recipe tmp = new Recipe();
+            tmp.setId(res.getInt(res.getColumnIndex(RecipeEntry._ID)));
+            tmp.setName(res.getString(res.getColumnIndex(RecipeEntry.RECIPES_COLUMN_NAME)));
+            tmp.setNotes(res.getString(res.getColumnIndex(RecipeEntry.RECIPES_COLUMN_NOTES)));
+            tmp.setSource(res.getString(res.getColumnIndex(RecipeEntry.RECIPES_COLUMN_SOURCE)));
+            int starred = res.getInt(res.getColumnIndex(RecipeEntry.RECIPES_COLUMN_STARRED));
+            if(starred == 1) {
+                tmp.setStarred(true);
+            } else {
+                tmp.setStarred(false);
+            }
+            Cursor res2 =  db.rawQuery( "SELECT " + PathEntry.PATHS_COLUMN_PATH + " FROM  " +
+                    RecipeEntry.RECIPES_TABLE_NAME
+                    + " r JOIN " + RecipeToPathEntry.RECIPETOPATH_TABLE_NAME
+                    + " rp ON (r._id = rp." + RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID
+                    + ") JOIN " + PathEntry.PATHS_TABLE_NAME + " p ON (p._id = rp." +
+                    RecipeToPathEntry.RECIPETOPATH_COLUMN_PATHID + ")", null );
+
+            res2.moveToFirst();
+            ArrayList<String> paths = new ArrayList<>();
+            while(res2.isAfterLast() == false){
+                paths.add(res.getString(res2.getInt(0)));
+                res2.moveToNext();
+            }
+            tmp.setUrisFromPaths(paths);
+            recipes.add(tmp);
             res.moveToNext();
         }
         db.close();
-        return array_list;
+        return recipes;
     }
 
     public ArrayList<Tag> getAllTags()

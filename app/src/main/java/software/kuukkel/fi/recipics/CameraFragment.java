@@ -88,17 +88,13 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         if(fileUris.size() > 0 ) {
             ImageView mImageView = (ImageView) mahView.findViewById(R.id.capturedImageview);
             if (fileUris.get(0) != null ) {
-                // bimatp factory
-                BitmapFactory.Options options = new BitmapFactory.Options();
 
-                // downsizing image as it throws OutOfMemory Exception for larger
-                // images
-                options.inSampleSize = 4;
-
-                final Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoUri.getPath(),
-                        options);
-
-                mImageView.setImageBitmap(bitmap);
+                try {
+                    mImageView.setImageBitmap(
+                            HelperClass.handleSamplingAndRotationBitmap(getActivity(), fileUris.get(0)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -150,18 +146,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             try {
                 ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
 
-                // bimatp factory
-                BitmapFactory.Options options = new BitmapFactory.Options();
-
-                // downsizing image as it throws OutOfMemory Exception for larger
-                // images
-                options.inSampleSize = 4;
-
-                final Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoUri.getPath(),
-                        options);
-
-                mImageView.setImageBitmap(bitmap);
-            } catch (NullPointerException e) {
+                mImageView.setImageBitmap(
+                        HelperClass.handleSamplingAndRotationBitmap(getActivity(), mCurrentPhotoUri));
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

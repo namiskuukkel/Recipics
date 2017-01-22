@@ -20,11 +20,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.fragment_main);
         checkFirstRun();
 
-        //DBHelper db = new DBHelper(this);
+        /*DBHelper db = new DBHelper(this);
 
-        /*db.chickenDestroy();
+        db.chickenDestroy();
 
-        Tag[] defaultTags = HerperClass.createDefaultTags();
+        Tag[] defaultTags = HelperClass.createDefaultTags();
         db.insertDefaultTags(defaultTags);*/
 
         Button newButton= (Button) findViewById(R.id.newButton);
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         Button button= (Button) findViewById(R.id.searchButton);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, RecipeDetailsFillFragment.class));
+                startActivity(new Intent(MainActivity.this, ViewRecipe.class));
             }
         });
     }
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
             //Database creation
             DBHelper db = new DBHelper(this);
-            Tag[] defaultTags = HerperClass.createDefaultTags();
+            Tag[] defaultTags = HelperClass.createDefaultTags();
             db.insertDefaultTags(defaultTags);
 
         } else if (currentVersionCode > savedVersionCode) {

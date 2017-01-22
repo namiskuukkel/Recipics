@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.nfc.tech.TagTechnology;
 import android.os.Bundle;
@@ -85,6 +86,7 @@ public class ViewPagerFragmentActivity extends FragmentActivity
 
         DBHelper db = new DBHelper(this);
         db.insertRecipe(recipe, tags);
+        startActivity(new Intent(ViewPagerFragmentActivity.this, ViewRecipe.class));
     }
 
     public void SaveChosenTags(List<com.cunoraz.tagview.Tag> chosen, List<com.cunoraz.tagview.Tag> notChosen) {
