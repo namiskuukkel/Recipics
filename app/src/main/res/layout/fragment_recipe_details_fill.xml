@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="software.kuukkel.fi.recipics.RecipeDetailsFillFragment"
+    tools:context="software.kuukkel.fi.recipics.CreateRecipe.RecipeDetailsFillFragment"
     android:gravity="center_vertical|center_horizontal">
 
 

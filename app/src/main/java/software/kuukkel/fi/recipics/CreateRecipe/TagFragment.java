@@ -1,4 +1,4 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.CreateRecipe;
 
 import android.support.v4.app.Fragment;
 import android.content.Context;
@@ -16,6 +16,8 @@ import java.util.List;
 import com.cunoraz.tagview.OnTagClickListener;
 import com.cunoraz.tagview.TagView;
 import com.cunoraz.tagview.Tag;
+
+import software.kuukkel.fi.recipics.R;
 
 //TODO: At which lifecycle phase should the chosen tags be saved to parent activity?
 public class TagFragment extends Fragment {
@@ -117,7 +119,10 @@ public class TagFragment extends Fragment {
     }
 
     public List<Tag> getChosenTags() {
-        return chosenTagGroup.getTags();
+        if(chosenTagGroup != null) {
+            return chosenTagGroup.getTags();
+        }
+        else { return new ArrayList<Tag>(); }
     }
 
     /*Interface to save tags chosen by the user when fragment is killed and to get them back once

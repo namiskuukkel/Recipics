@@ -12,6 +12,11 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import software.kuukkel.fi.recipics.CreateRecipe.ViewPagerFragmentActivity;
+import software.kuukkel.fi.recipics.Database.DBHelper;
+import software.kuukkel.fi.recipics.Objects.Tag;
+import software.kuukkel.fi.recipics.ViewRecipe.ViewRecipe;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override

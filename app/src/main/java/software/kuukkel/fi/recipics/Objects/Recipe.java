@@ -1,11 +1,6 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.Objects;
 
-import android.net.Uri;
-import android.provider.BaseColumns;
-
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by namiskuukkel on 6.6.2016.
@@ -15,20 +10,20 @@ public class Recipe {
     private int id;
     private String name = "";
     //Filepaths of the pictures connected to the recipe
-    private ArrayList<Uri> pictureUris;
+    private ArrayList<String> picturePaths;
     private String notes = "";
     private Boolean starred = false;
     private String source = "";
     private ArrayList<Tag> tags;
 
     public Recipe() {
-        pictureUris = new ArrayList<>();
+        picturePaths = new ArrayList<>();
     }
 
-    public Recipe( int id, String name, ArrayList<Uri> pictureUris, String notes, Boolean starred) {
+    public Recipe( int id, String name, ArrayList<String> picturePaths, String notes, Boolean starred) {
         this.id = id;
         this.name = name;
-        this.pictureUris = pictureUris;
+        this.picturePaths = picturePaths;
         this.notes = notes;
         this.starred = starred;
     }
@@ -50,23 +45,9 @@ public class Recipe {
         this.name = name;
     }
 
-    public ArrayList<Uri> getPictureUris() { return pictureUris; }
+    public ArrayList<String> getPicturePaths() { return picturePaths; }
 
-    public void setPictureUris(ArrayList<Uri> uris) { pictureUris = uris; }
-
-    public void setUrisFromPaths(ArrayList<String> paths) {
-        for(String path: paths) {
-            pictureUris.add(Uri.fromFile(new File(path)));
-        }
-    }
-
-    public ArrayList<String> getFilePaths() {
-        ArrayList<String> paths = new ArrayList<>();
-        for(Uri uri: this.pictureUris ) {
-            paths.add(uri.getPath());
-        }
-        return paths;
-    }
+    public void setPicturePaths(ArrayList<String> paths) { picturePaths = paths; }
 
     public String getNotes() {
         return notes;
@@ -86,5 +67,13 @@ public class Recipe {
 
     public void setStarred(Boolean starred) {
         this.starred = starred;
+    }
+
+    public ArrayList<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(ArrayList<Tag> tags) {
+        this.tags = tags;
     }
 }

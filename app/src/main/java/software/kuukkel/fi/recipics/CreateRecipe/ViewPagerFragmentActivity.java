@@ -1,18 +1,22 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.CreateRecipe;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import android.content.Intent;
-import android.net.Uri;
-import android.nfc.tech.TagTechnology;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Toast;
+
+import software.kuukkel.fi.recipics.Database.DBHelper;
+import software.kuukkel.fi.recipics.R;
+import software.kuukkel.fi.recipics.Objects.Recipe;
+import software.kuukkel.fi.recipics.Objects.Tag;
+import software.kuukkel.fi.recipics.ViewRecipe.ViewRecipe;
 //Based on: https://thepseudocoder.wordpress.com/2011/10/05/android-page-swiping-using-viewpager/
 
 /**
@@ -37,8 +41,8 @@ public class ViewPagerFragmentActivity extends FragmentActivity
         super.setContentView(R.layout.fragment_view_pager);
 
         recipe = new Recipe();
-        ArrayList<Uri> pictureUris = new ArrayList<>();
-        recipe.setPictureUris(pictureUris);
+        ArrayList<String> picturePaths = new ArrayList<>();
+        recipe.setPicturePaths(picturePaths);
         //initialse the pager
         this.initialisePaging();
     }
@@ -60,15 +64,15 @@ public class ViewPagerFragmentActivity extends FragmentActivity
 
     public void saveRecipe(View view) {
         CameraFragment cameraFrag = (CameraFragment) fragments.get(0);
-        ArrayList<Uri> pictureUris = cameraFrag.getPictureUris();
-        if(pictureUris.size() == 0) {
+        ArrayList<String> picturePaths = cameraFrag.getPicturePaths();
+        if(picturePaths.size() == 0) {
             CharSequence text = "You can't save a recipe without a picture!";
             int duration = Toast.LENGTH_LONG;
             Toast toast = Toast.makeText(this, text, duration);
             toast.show();
             return;
         }
-        recipe.setPictureUris(pictureUris);
+        recipe.setPicturePaths(picturePaths);
 
         RecipeDetailsFillFragment recipeFrag = (RecipeDetailsFillFragment) fragments.get(1);
         Recipe tmpRecipe = recipeFrag.getRecipe();
@@ -111,8 +115,8 @@ public class ViewPagerFragmentActivity extends FragmentActivity
         return tags;
     }
 
-    public void savePictureUris(ArrayList<Uri> uris) { recipe.setPictureUris(uris); }
+    public void savePicturePaths(ArrayList<String> paths) { recipe.setPicturePaths(paths); }
 
-    public ArrayList<Uri> getPictureUris() { return recipe.getPictureUris(); }
+    public ArrayList<String> getPicturePaths() { return recipe.getPicturePaths(); }
 
 }

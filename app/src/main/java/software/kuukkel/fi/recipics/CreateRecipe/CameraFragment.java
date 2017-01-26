@@ -1,4 +1,4 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.CreateRecipe;
 
 import android.Manifest;
 import android.app.Activity;
@@ -15,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,19 +35,26 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import software.kuukkel.fi.recipics.HelperClass;
+import software.kuukkel.fi.recipics.R;
+
 import static android.app.Activity.RESULT_OK;
 
 
-public class CameraFragment extends Fragment implements View.OnClickListener {
+public class CameraFragment extends Fragment {
 
     public final static String PATHS = "paths";
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 42;
+    View mView;
+    LinearLayout parentLayout;
+
+    Button camera;
     private String mCurrentPhotoPath;
     private Uri mCurrentPhotoUri;
-    private ArrayList<Uri> fileUris;
+    private ArrayList<String> filePaths;
 
     private PreserveFileUris mCallback;
 
@@ -77,36 +87,68 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
             return null;
         }
 
-        View mahView = inflater.inflate(R.layout.fragment_camera, container, false);
-        mahView.findViewById(R.id.newPicture).setOnClickListener(this);
+        mView = inflater.inflate(R.layout.fragment_camera, container, false);
 
         //FileUri array is initialised when the parent activity is created. Hence, this works both
         //on the first time as well as the latter times
-        fileUris = mCallback.getPictureUris();
+        filePaths = mCallback.getPicturePaths();
+
+        parentLayout = (LinearLayout) mView.findViewById(R.id.camera_fragment);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+
         //If the array isn't empty, we are returning to this fragment and there is already a picture
         //to show
-        if(fileUris.size() > 0 ) {
-            ImageView mImageView = (ImageView) mahView.findViewById(R.id.capturedImageview);
-            if (fileUris.get(0) != null ) {
-
-                try {
-                    mImageView.setImageBitmap(
-                            HelperClass.handleSamplingAndRotationBitmap(getActivity(), fileUris.get(0)));
-                } catch (Exception e) {
-                    e.printStackTrace();
+        if(filePaths.size() > 0 ) {
+            for(final String path: filePaths) {
+                if (path != null) {
+                    RelativeLayout rl = new RelativeLayout(getActivity());
+                    try {
+                        ImageView mImageView = new ImageView(getActivity());
+                        mImageView.setImageBitmap(
+                                HelperClass.handleSamplingAndRotationBitmap(getActivity(),
+                                        Uri.fromFile(new File(path))));
+                        rl.addView(mImageView);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    Button delete = new Button(getActivity());
+                    delete.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
+                            R.drawable.delete), null, null, null);
+                    delete.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            File delete = new File(path);
+                            delete.delete();
+                            for(int i = 0; i < filePaths.size(); i++) {
+                                if(filePaths.get(i) == path) {
+                                    filePaths.remove(i);
+                                    break;
+                                }
+                            }
+                            RelativeLayout parent = (RelativeLayout) view.getParent();
+                            parentLayout.removeView(parent);
+                        }
+                    });
+                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                    params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    rl.addView(delete, params);
+                    parentLayout.addView(rl);
                 }
             }
         }
 
-
-
-        return mahView;
-    }
-
-    public void onClick(View view) {
-        if(view.getId() == R.id.newPicture) {
-            startCamera(view);
-        }
+        camera = new Button(getActivity());
+        camera.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
+                R.drawable.camera), null, null, null);
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startCamera(view);
+            }});
+        parentLayout.addView(camera, params);
+        return mView;
     }
 
     private void startCamera(View view) {
@@ -114,40 +156,70 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
 
+            File photoFile = null;
+
             //Check if the user has already accepted the permissions for memory accesses
             checkPermissions();
+
             // Create the File where the photo should go
-            File photoFile = null;
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
                 Log.d("st", ex.getMessage());
             }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
 
-                mCurrentPhotoUri = Uri.fromFile(photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        mCurrentPhotoUri);
+            mCurrentPhotoUri = Uri.fromFile(photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                    mCurrentPhotoUri);
 
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-
-            fileUris.add(mCurrentPhotoUri);
+            filePaths.add(mCurrentPhotoUri.getPath());
             galleryAddPic();
 
-            //TODO: Vertical pictures won't show vertical. Whyyyy?!
             try {
-                ImageView mImageView = (ImageView) getView().findViewById(R.id.capturedImageview);
+                ImageView mImageView = new ImageView(getActivity());
 
                 mImageView.setImageBitmap(
                         HelperClass.handleSamplingAndRotationBitmap(getActivity(), mCurrentPhotoUri));
+                //Remove and re-add camera button to preserve the order of buttons
+                parentLayout.removeView(camera);
+                RelativeLayout rl = new RelativeLayout(getActivity());
+                rl.addView(mImageView);
+                Button delete = new Button(getActivity());
+                delete.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
+                        R.drawable.delete), null, null, null);
+                delete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        File file = new File(mCurrentPhotoPath);
+                        file.delete();
+                        for(int i = 0; i < filePaths.size(); i++) {
+                            if(filePaths.get(i) == mCurrentPhotoPath) {
+                                filePaths.remove(i);
+                                break;
+                            }
+                        }
+                        RelativeLayout parent = (RelativeLayout) view.getParent();
+                        parentLayout.removeView(parent);
+                    }});
+
+                RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                p.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                p.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                rl.addView(delete, p);
+                delete.setLayoutParams(p);
+                rl.setPadding(0, 0, 0, 20);
+                parentLayout.addView(rl);
+                parentLayout.addView(camera);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -158,7 +230,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         super.onPause();
-        mCallback.savePictureUris(fileUris);
+        mCallback.savePicturePaths(filePaths);
         Log.d("pause", "onPause: Camera");
     }
 
@@ -201,6 +273,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         File f = new File(mCurrentPhotoPath);
+        Log.d("File path", mCurrentPhotoPath);
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         getActivity().sendBroadcast(mediaScanIntent);
@@ -278,12 +351,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     }
 
     //This method is for the parent activity to get the fileuris, when user presses the save button
-    public ArrayList<Uri> getPictureUris() {
-        return fileUris;
+    public ArrayList<String> getPicturePaths() {
+        return filePaths;
     }
 
-    public static interface PreserveFileUris {
-        public void savePictureUris(ArrayList<Uri> path);
-        public ArrayList<Uri> getPictureUris();
-    }
+public static interface PreserveFileUris {
+    public void savePicturePaths(ArrayList<String> paths);
+    public ArrayList<String> getPicturePaths();
+}
 }

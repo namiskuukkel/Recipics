@@ -1,4 +1,4 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.CreateRecipe;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

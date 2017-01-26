@@ -1,23 +1,17 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:gravity="center_vertical|center_horizontal"
-    android:orientation="vertical"
-    android:scrollbars="vertical"
-    tools:context=".CameraFragment">
+    tools:context=".CreateRecipe.CameraFragment">
+    <LinearLayout
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical"
+        android:scrollbars="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/camera_fragment"
+        >
 
-    <ImageView
-        android:id="@+id/capturedImageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="20px"
-        android:minWidth="20px" />
-
-    <Button
-        android:id="@+id/newPicture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/new_picture" />
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,4 +1,4 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.Database;
 
 import java.util.ArrayList;
 
@@ -8,12 +8,13 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 import android.util.Log;
 
-import static software.kuukkel.fi.recipics.Tag.*;
+import software.kuukkel.fi.recipics.Objects.Recipe;
+import software.kuukkel.fi.recipics.Objects.Tag;
 
-import static software.kuukkel.fi.recipics.DBConst.*;
+import static software.kuukkel.fi.recipics.Database.DBConst.*;
+import static software.kuukkel.fi.recipics.Objects.Tag.Type.DISH;
 
 /**
  * Created by namiskuukkel on 6.6.2016.
@@ -23,9 +24,6 @@ import static software.kuukkel.fi.recipics.DBConst.*;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
-
-
-
 
     public DBHelper(Context context)
     {
@@ -84,13 +82,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
             long recipeId = db.insert(RecipeEntry.RECIPES_TABLE_NAME, null, RecipeContentValues);
 
+            //Create paths for the recipe
             ArrayList<Long> pathIds = new ArrayList<Long>();
-            for (String path: recipe.getFilePaths()) {
+            for (String path: recipe.getPicturePaths()) {
                 ContentValues PathContentValues = new ContentValues();
                 PathContentValues.put(PathEntry.PATHS_COLUMN_PATH, path);
                 pathIds.add(db.insert(PathEntry.PATHS_TABLE_NAME, null, PathContentValues));
             }
 
+            //Connect the new paths with the recipe on RecipeToPath
             for (long pathId : pathIds) {
                 ContentValues RecipeToPathsValues = new ContentValues();
                 RecipeToPathsValues.put(RecipeToPathEntry.RECIPETOPATH_COLUMN_PATHID, pathId);
@@ -98,12 +98,12 @@ public class DBHelper extends SQLiteOpenHelper {
                 db.insert(RecipeToPathEntry.RECIPETOPATH_TABLE_NAME, null, RecipeToPathsValues);
             }
 
-            //TODO Should be tag objects
+            //Create RecipeToTag entries for the Recipe
             ArrayList<Long> tagIds = new ArrayList();
             for (Tag tag: tags) {
                 ContentValues RecipeTagContentValues = new ContentValues();
                 RecipeTagContentValues.put(RecipeToTagEntry.RECIPETOTAG_COLUMN_RECIPEID, recipeId);
-                RecipeTagContentValues.put(RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGID, tag.getName());
+                RecipeTagContentValues.put(RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGNAME, tag.getName());
                 tagIds.add(db.insert(RecipeToTagEntry.RECIPETOTAG_TABLE_NAME, null, RecipeTagContentValues));
             }
             db.setTransactionSuccessful();
@@ -173,25 +173,55 @@ public class DBHelper extends SQLiteOpenHelper {
             } else {
                 tmp.setStarred(false);
             }
-            Cursor res2 =  db.rawQuery( "SELECT " + PathEntry.PATHS_COLUMN_PATH + " FROM  " +
-                    RecipeEntry.RECIPES_TABLE_NAME
-                    + " r JOIN " + RecipeToPathEntry.RECIPETOPATH_TABLE_NAME
-                    + " rp ON (r._id = rp." + RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID
-                    + ") JOIN " + PathEntry.PATHS_TABLE_NAME + " p ON (p._id = rp." +
-                    RecipeToPathEntry.RECIPETOPATH_COLUMN_PATHID + ")", null );
 
-            res2.moveToFirst();
-            ArrayList<String> paths = new ArrayList<>();
-            while(res2.isAfterLast() == false){
-                paths.add(res.getString(res2.getInt(0)));
-                res2.moveToNext();
-            }
-            tmp.setUrisFromPaths(paths);
+            tmp.setPicturePaths(getFilePathsForRecipe(db, tmp.getId()));
+            tmp.setTags(getTagsForRecipe(db, tmp.getId()));
             recipes.add(tmp);
             res.moveToNext();
         }
+        res.close();
         db.close();
         return recipes;
+    }
+
+    public ArrayList<String> getFilePathsForRecipe(SQLiteDatabase db, int id) {
+        Cursor res =  db.rawQuery( "SELECT " + PathEntry.PATHS_COLUMN_PATH + " FROM  " +
+                RecipeEntry.RECIPES_TABLE_NAME
+                + " r JOIN " + RecipeToPathEntry.RECIPETOPATH_TABLE_NAME
+                + " rp ON (r._id = rp." + RecipeToPathEntry.RECIPETOPATH_COLUMN_RECIPEID
+                + ") JOIN " + PathEntry.PATHS_TABLE_NAME + " p ON (p._id = rp." +
+                RecipeToPathEntry.RECIPETOPATH_COLUMN_PATHID + ") WHERE r._id = " +
+                id, null );
+
+        res.moveToFirst();
+        ArrayList<String> paths = new ArrayList<>();
+        while(res.isAfterLast() == false){
+            paths.add(res.getString(0));
+            res.moveToNext();
+        }
+        return paths;
+    }
+
+    public ArrayList<Tag> getTagsForRecipe(SQLiteDatabase db, int id) {
+        Cursor res =  db.rawQuery( "SELECT * FROM  " +
+                RecipeEntry.RECIPES_TABLE_NAME
+                + " r JOIN " + RecipeToTagEntry.RECIPETOTAG_TABLE_NAME
+                + " rt ON (r._id = rt." + RecipeToTagEntry.RECIPETOTAG_COLUMN_RECIPEID
+                + ") JOIN " + TagEntry.TAGS_TABLE_NAME + " t ON (t." + TagEntry.TAGS_COLUMN_NAME +
+                " = rt." + RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGNAME + ") WHERE r._id = " +
+                id, null );
+
+        res.moveToFirst();
+        ArrayList<Tag> tags = new ArrayList<>();
+        while(res.isAfterLast() == false){
+            tags.add(new Tag(res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_NAME )),
+                    res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_COLOR)),
+                    stringToTagType(res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_TYPE))),
+                    res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_PARENT_TAG))));
+            res.moveToNext();
+        }
+        res.close();
+        return tags;
     }
 
     public ArrayList<Tag> getAllTags()
@@ -199,16 +229,49 @@ public class DBHelper extends SQLiteOpenHelper {
         ArrayList<Tag> array_list = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from " + TagEntry.TAGS_TABLE_NAME, null );
+        Cursor res =  db.rawQuery( "SELECT * FROM " + TagEntry.TAGS_TABLE_NAME, null );
         res.moveToFirst();
 
         while(res.isAfterLast() == false){
             array_list.add(new Tag(res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_NAME )),
-                    res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_COLOR))));
+                    res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_COLOR)),
+                    stringToTagType(res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_TYPE))),
+                    res.getString(res.getColumnIndex(TagEntry.TAGS_COLUMN_PARENT_TAG))));
             res.moveToNext();
         }
+        res.close();
         db.close();
         return array_list;
+    }
+
+    public Tag.Type stringToTagType(String type) {
+        switch (type) {
+            case "dish":
+                return DISH;
+            case "ingredient":
+                return Tag.Type.INGREDIENT;
+            case "origin":
+                return Tag.Type.ORIGIN;
+            case "swiftness":
+                return Tag.Type.SWIFTNESS;
+            default:
+                return Tag.Type.UNDEFINED;
+        }
+    }
+
+    public String tagTypeToString(Tag.Type type) {
+        switch (type) {
+            case DISH:
+                return "dish";
+            case INGREDIENT:
+                return "ingredient";
+            case ORIGIN:
+                return "origin";
+            case SWIFTNESS:
+                return "swiftness";
+            default:
+                return "undefined";
+        }
     }
 
     public void saveRecipe(Recipe id) {
@@ -218,17 +281,53 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update("contacts", contentValues, "id = ? ", new String[] { Integer.toString(5) } );
 
     }
+
+    public Boolean insertTag(Tag tag) {
+        //Check if there already is a tag by that name
+        if(tagExists(tag.getName())) {
+            return false;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TagEntry.TAGS_COLUMN_NAME, tag.getName());
+        contentValues.put(TagEntry.TAGS_COLUMN_COLOR, tag.getColor());
+        contentValues.put(TagEntry.TAGS_COLUMN_TYPE, tagTypeToString(tag.getType()));
+        contentValues.put(TagEntry.TAGS_COLUMN_PARENT_TAG, tag.getParentCategory());
+        db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
+        db.close();
+        return true;
+    }
+
+    private Boolean tagExists(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selectString = "SELECT * FROM " + TagEntry.TAGS_TABLE_NAME + " WHERE " +
+                TagEntry.TAGS_COLUMN_NAME + " =?";
+
+        // Add the String you are searching by here.
+        // Put it in an array to avoid an unrecognized token error
+        Cursor cursor = db.rawQuery(selectString, new String[] {name});
+
+        boolean hasObject = false;
+        if(cursor.moveToFirst()) {
+            hasObject = true;
+        }
+        cursor.close();
+        db.close();
+        return hasObject;
+    }
+
     //TODO: Insert tag; check that a tag with the new tag name doesn't already exist
     public void insertDefaultTags(Tag[] tags){
         SQLiteDatabase db = this.getWritableDatabase();
-
         try {
             db.beginTransaction();
             for ( Tag tag : tags) {
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(TagEntry.TAGS_COLUMN_NAME, tag.getName());
                 contentValues.put(TagEntry.TAGS_COLUMN_COLOR, tag.getColor());
-                long id = db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
+                contentValues.put(TagEntry.TAGS_COLUMN_TYPE, tagTypeToString(tag.getType()));
+                contentValues.put(TagEntry.TAGS_COLUMN_PARENT_TAG, tag.getParentCategory());
+                db.insert(TagEntry.TAGS_TABLE_NAME, null, contentValues);
             }
             db.setTransactionSuccessful();
         } catch(Exception ex ) {

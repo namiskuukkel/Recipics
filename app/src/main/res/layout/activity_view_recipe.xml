@@ -1,11 +1,14 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="software.kuukkel.fi.recipics.ViewRecipe"
-    android:gravity="center_vertical|center_horizontal"
-    android:id="@+id/viewRecipe">
-
-</LinearLayout>
-
+    tools:context="software.kuukkel.fi.recipics.ViewRecipe.ViewRecipe">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/viewRecipe">
+    </LinearLayout>
+</ScrollView>

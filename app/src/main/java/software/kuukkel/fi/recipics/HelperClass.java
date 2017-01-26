@@ -1,22 +1,22 @@
 package software.kuukkel.fi.recipics;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.provider.MediaStore;
 
-import java.io.File;
 import android.net.Uri;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
-import static software.kuukkel.fi.recipics.Tag.Type.DISH;
+import software.kuukkel.fi.recipics.Objects.Tag;
+
+import static software.kuukkel.fi.recipics.Objects.Tag.Type.DISH;
+import static software.kuukkel.fi.recipics.Objects.Tag.Type.INGREDIENT;
+import static software.kuukkel.fi.recipics.Objects.Tag.Type.ORIGIN;
+import static software.kuukkel.fi.recipics.Objects.Tag.Type.SWIFTNESS;
 
 /**
  * Created by namiskuukkel on 8.6.2016.
@@ -25,11 +25,20 @@ public class HelperClass {
 
 
     static Tag[] createDefaultTags() {
-        Tag[] tags = {new Tag("Main dish", "#5977FF", DISH), new Tag("Dessert", "#BEDDED", DISH),
-                new Tag("Side", "#BBDBD1", DISH), new Tag("Snack", "#7E78D2", DISH)};
+        Tag[] tags =
+                {new Tag("Main dish", "#5977FF", DISH, ""),
+                new Tag("Dessert", "#BEDDED", DISH, ""),
+                new Tag("Side", "#BBDBD1", DISH, ""),
+                new Tag("Snack", "#7E78D2", DISH, ""),
+                new Tag("Meat", "#856A5D", INGREDIENT, ""),
+                new Tag("Pork", "#CCC9E7", INGREDIENT, "Meat"),
+                new Tag("30min", "#98CE00", SWIFTNESS, ""),
+                new Tag("1h", "#FCF1D7", SWIFTNESS, ""),
+                new Tag("Japanese", "#B6BE9C", ORIGIN, "")};
         return tags;
     }
 
+    //http://stackoverflow.com/questions/14066038/why-does-an-image-captured-using-camera-intent-gets-rotated-on-some-devices-on-a
     public static Bitmap handleSamplingAndRotationBitmap(Context context, Uri selectedImage)
             throws IOException {
         int MAX_HEIGHT = 1024;
@@ -51,6 +60,7 @@ public class HelperClass {
         Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
 
         img = rotateImageIfRequired(img, selectedImage);
+
         return img;
     }
     /**

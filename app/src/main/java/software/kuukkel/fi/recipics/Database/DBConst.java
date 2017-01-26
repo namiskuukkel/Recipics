@@ -1,4 +1,4 @@
-package software.kuukkel.fi.recipics;
+package software.kuukkel.fi.recipics.Database;
 
 import android.provider.BaseColumns;
 
@@ -39,11 +39,15 @@ public class DBConst {
         public static final String TAGS_TABLE_NAME = "tags";
         public static final String TAGS_COLUMN_NAME = "name";
         public static final String TAGS_COLUMN_COLOR = "color";
+        public static final String TAGS_COLUMN_TYPE = "type";
+        public static final String TAGS_COLUMN_PARENT_TAG = "parenttype";
     }
 
     public static final String CREATE_TABLE_TAGS = CREATE + TagEntry.TAGS_TABLE_NAME +
             " (" + TagEntry.TAGS_COLUMN_NAME + TEXT_TYPE + PRIMARY_KEY + COMMA_SEP
-            + TagEntry.TAGS_COLUMN_COLOR + TEXT_TYPE + ")";
+            + TagEntry.TAGS_COLUMN_COLOR + TEXT_TYPE + COMMA_SEP
+            + TagEntry.TAGS_COLUMN_TYPE + TEXT_TYPE + COMMA_SEP
+            + TagEntry.TAGS_COLUMN_PARENT_TAG + ")";
 
     public static abstract class PathEntry implements BaseColumns {
         public static final String PATHS_TABLE_NAME = "paths";
@@ -60,14 +64,14 @@ public class DBConst {
         //TODO: Is this required?
         public static final String RECIPETOTAG_COLUMN_ID = "id";
         public static final String RECIPETOTAG_COLUMN_RECIPEID = "recipeid";
-        public static final String RECIPETOTAG_COLUMN_TAGID = "tagid";
+        public static final String RECIPETOTAG_COLUMN_TAGNAME = "tagname";
     }
 
     public static final String CREATE_TABLE_RECIPETOTAG = CREATE +
             RecipeToTagEntry.RECIPETOTAG_TABLE_NAME + " (" +
             RecipeToTagEntry._ID + NUMBER_TYPE + PRIMARY_KEY + AUTOINCREMENT + COMMA_SEP +
             RecipeToTagEntry.RECIPETOTAG_COLUMN_RECIPEID + NUMBER_TYPE + COMMA_SEP +
-            RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGID + TEXT_TYPE + ")";
+            RecipeToTagEntry.RECIPETOTAG_COLUMN_TAGNAME + TEXT_TYPE + ")";
 
     public static abstract class RecipeToPathEntry implements BaseColumns {
         public static final String RECIPETOPATH_TABLE_NAME = "RecipeToPath";
