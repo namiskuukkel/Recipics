@@ -1,23 +1,15 @@
 package software.kuukkel.fi.recipics.CreateRecipe;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,12 +22,12 @@ import android.widget.RelativeLayout;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import software.kuukkel.fi.recipics.HelperClass;
+import software.kuukkel.fi.recipics.Objects.ButtonAndFilepath;
 import software.kuukkel.fi.recipics.R;
 
 import static android.app.Activity.RESULT_OK;
@@ -55,7 +47,7 @@ public class CameraFragment extends Fragment {
     private String mCurrentPhotoPath;
     private Uri mCurrentPhotoUri;
     private ArrayList<String> filePaths;
-
+    private ArrayList<ButtonAndFilepath> deleteFileTuples;
     private PreserveFileUris mCallback;
 
     @Override
@@ -98,6 +90,8 @@ public class CameraFragment extends Fragment {
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
 
+        deleteFileTuples = new ArrayList<>();
+
         //If the array isn't empty, we are returning to this fragment and there is already a picture
         //to show
         if(filePaths.size() > 0 ) {
@@ -116,21 +110,17 @@ public class CameraFragment extends Fragment {
                     Button delete = new Button(getActivity());
                     delete.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
                             R.drawable.delete), null, null, null);
+
+                    ButtonAndFilepath tmp = new ButtonAndFilepath(delete, path);
+                    deleteFileTuples.add(tmp);
+
                     delete.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            File delete = new File(path);
-                            delete.delete();
-                            for(int i = 0; i < filePaths.size(); i++) {
-                                if(filePaths.get(i) == path) {
-                                    filePaths.remove(i);
-                                    break;
-                                }
-                            }
-                            RelativeLayout parent = (RelativeLayout) view.getParent();
-                            parentLayout.removeView(parent);
+                            removeFile(view);
                         }
                     });
+
                     params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                     params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                     rl.addView(delete, params);
@@ -195,19 +185,14 @@ public class CameraFragment extends Fragment {
                 Button delete = new Button(getActivity());
                 delete.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
                         R.drawable.delete), null, null, null);
+
+                ButtonAndFilepath tmp = new ButtonAndFilepath(delete, mCurrentPhotoUri.getPath());
+                deleteFileTuples.add(tmp);
+
                 delete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        File file = new File(mCurrentPhotoPath);
-                        file.delete();
-                        for(int i = 0; i < filePaths.size(); i++) {
-                            if(filePaths.get(i) == mCurrentPhotoPath) {
-                                filePaths.remove(i);
-                                break;
-                            }
-                        }
-                        RelativeLayout parent = (RelativeLayout) view.getParent();
-                        parentLayout.removeView(parent);
+                        removeFile(view);
                     }});
 
                 RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
@@ -277,6 +262,27 @@ public class CameraFragment extends Fragment {
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         getActivity().sendBroadcast(mediaScanIntent);
+    }
+
+    private void removeFile(View view) {
+        //Search the tuples for the button that was clicked
+        for(int i = 0; i < deleteFileTuples.size(); i++) {
+            if(deleteFileTuples.get(i).getDelete() == view) {
+                //Search the filepaths for the path that was connected to the button
+                for (int j = 0; j < filePaths.size(); j++) {
+                    if (filePaths.get(j) == deleteFileTuples.get(i).getFilePath()) {
+                        //Remove the button from both the filesystem and filepaths list
+                        File file = new File(deleteFileTuples.get(i).getFilePath());
+                        file.delete();
+                        filePaths.remove(j);
+                        break;
+                    }
+                }
+            }
+        }
+        //Delete the layout containing the picture and the button from the top level layout
+        RelativeLayout parent = (RelativeLayout) view.getParent();
+        parentLayout.removeView(parent);
     }
 
     //For new versions of android: Ask for application permissions on runtime
