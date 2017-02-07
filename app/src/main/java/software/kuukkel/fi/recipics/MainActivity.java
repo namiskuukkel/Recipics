@@ -15,6 +15,7 @@ import java.io.File;
 import software.kuukkel.fi.recipics.CreateRecipe.ViewPagerFragmentActivity;
 import software.kuukkel.fi.recipics.Database.DBHelper;
 import software.kuukkel.fi.recipics.Objects.Tag;
+import software.kuukkel.fi.recipics.Search.SearchRecipes;
 import software.kuukkel.fi.recipics.ViewRecipe.ViewRecipe;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         db.chickenDestroy();
 
-        Tag[] defaultTags = HelperClass.createDefaultTags();
+        Tag[] defaultTags = HelperClass.createDefaultTags_English();
         db.insertDefaultTags(defaultTags);*/
 
         Button newButton= (Button) findViewById(R.id.newButton);
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         Button button= (Button) findViewById(R.id.searchButton);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ViewRecipe.class));
+                startActivity(new Intent(MainActivity.this, SearchRecipes.class));
             }
         });
     }
@@ -79,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
             // TODO This is a new install (or the user cleared the shared preferences)
             if ( !isExternalStorageWritable()) {
-                Toast.makeText(MainActivity.this, "A new directory could not be created", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "A new directory could not be created",
+                        Toast.LENGTH_SHORT).show();
             }
             // Get the directory for the user's public pictures directory.
             File file = new File(Environment.getExternalStoragePublicDirectory(
@@ -94,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
             //Database creation
             DBHelper db = new DBHelper(this);
-            Tag[] defaultTags = HelperClass.createDefaultTags();
+            Tag[] defaultTags = HelperClass.createDefaultTags_English();
             db.insertDefaultTags(defaultTags);
 
         } else if (currentVersionCode > savedVersionCode) {

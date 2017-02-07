@@ -15,7 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -43,7 +43,7 @@ public class CameraFragment extends Fragment {
     View mView;
     LinearLayout parentLayout;
 
-    Button camera;
+    ImageButton camera;
     private String mCurrentPhotoPath;
     private Uri mCurrentPhotoUri;
     private ArrayList<String> filePaths;
@@ -107,9 +107,8 @@ public class CameraFragment extends Fragment {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    Button delete = new Button(getActivity());
-                    delete.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
-                            R.drawable.delete), null, null, null);
+                    ImageButton delete = new ImageButton(getActivity());
+                    delete.setImageResource(R.drawable.delete);
 
                     ButtonAndFilepath tmp = new ButtonAndFilepath(delete, path);
                     deleteFileTuples.add(tmp);
@@ -129,9 +128,8 @@ public class CameraFragment extends Fragment {
             }
         }
 
-        camera = new Button(getActivity());
-        camera.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
-                R.drawable.camera), null, null, null);
+        camera = new ImageButton(getActivity());
+        camera.setImageResource(R.drawable.camera);
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -182,9 +180,8 @@ public class CameraFragment extends Fragment {
                 parentLayout.removeView(camera);
                 RelativeLayout rl = new RelativeLayout(getActivity());
                 rl.addView(mImageView);
-                Button delete = new Button(getActivity());
-                delete.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getActivity(),
-                        R.drawable.delete), null, null, null);
+                ImageButton delete = new ImageButton(getActivity());
+                delete.setImageResource(R.drawable.delete);
 
                 ButtonAndFilepath tmp = new ButtonAndFilepath(delete, mCurrentPhotoUri.getPath());
                 deleteFileTuples.add(tmp);

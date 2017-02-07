@@ -35,7 +35,8 @@
         <activity android:name=".CreateRecipe.RecipeDetailsFillFragment" />
         <activity android:name=".CreateRecipe.ViewPagerFragmentActivity" />
         <activity android:name=".ViewRecipe.ViewRecipe" />
-        <activity android:name=".ViewRecipe.ViewPicturesFullscreen"></activity>
+        <activity android:name=".ViewRecipe.ViewPicturesFullscreen" />
+        <activity android:name=".Search.SearchRecipes"></activity>
     </application>
 
 </manifest>

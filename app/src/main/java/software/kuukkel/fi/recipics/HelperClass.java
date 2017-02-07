@@ -10,6 +10,8 @@ import android.net.Uri;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import software.kuukkel.fi.recipics.Objects.Tag;
 
@@ -24,17 +26,33 @@ import static software.kuukkel.fi.recipics.Objects.Tag.Type.SWIFTNESS;
 public class HelperClass {
 
 
-    static Tag[] createDefaultTags() {
+    public static Tag[] createDefaultTags_English() {
         Tag[] tags =
                 {new Tag("Main dish", "#5977FF", DISH, ""),
-                new Tag("Dessert", "#BEDDED", DISH, ""),
-                new Tag("Side", "#BBDBD1", DISH, ""),
-                new Tag("Snack", "#7E78D2", DISH, ""),
-                new Tag("Meat", "#856A5D", INGREDIENT, ""),
-                new Tag("Pork", "#CCC9E7", INGREDIENT, "Meat"),
-                new Tag("30min", "#98CE00", SWIFTNESS, ""),
-                new Tag("1h", "#FCF1D7", SWIFTNESS, ""),
-                new Tag("Japanese", "#B6BE9C", ORIGIN, "")};
+                        new Tag("Dessert", "#BEDDED", DISH, ""),
+                        new Tag("Side", "#BBDBD1", DISH, ""),
+                        new Tag("Snack", "#7E78D2", DISH, ""),
+                        new Tag("Meat", "#856A5D", INGREDIENT, ""),
+                        new Tag("Pork", "#CCC9E7", INGREDIENT, "Meat"),
+                        new Tag("30min", "#98CE00", SWIFTNESS, ""),
+                        new Tag("1h", "#FCF1D7", SWIFTNESS, ""),
+                        new Tag("Asian", "#068D9D", ORIGIN, ""),
+                        new Tag("Japanese", "#B6BE9C", ORIGIN, "Asian")};
+        return tags;
+    }
+
+    public static Tag[] createDefaultTags_Finnish() {
+        Tag[] tags =
+                {new Tag("Pääruoka", "#5977FF", DISH, ""),
+                        new Tag("Jälkiruoka", "#BEDDED", DISH, ""),
+                        new Tag("Lisuke", "#BBDBD1", DISH, ""),
+                        new Tag("Välipala", "#7E78D2", DISH, ""),
+                        new Tag("Liha", "#856A5D", INGREDIENT, ""),
+                        new Tag("Possu", "#CCC9E7", INGREDIENT, "Meat"),
+                        new Tag("30min", "#98CE00", SWIFTNESS, ""),
+                        new Tag("1h", "#FCF1D7", SWIFTNESS, ""),
+                        new Tag("Aasialainen", "#068D9D", ORIGIN, ""),
+                        new Tag("Japanilainen", "#B6BE9D", ORIGIN, "")};
         return tags;
     }
 

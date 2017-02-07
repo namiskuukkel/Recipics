@@ -16,6 +16,7 @@ import software.kuukkel.fi.recipics.Database.DBHelper;
 import software.kuukkel.fi.recipics.R;
 import software.kuukkel.fi.recipics.Objects.Recipe;
 import software.kuukkel.fi.recipics.Objects.Tag;
+import software.kuukkel.fi.recipics.ViewRecipe.ViewPicturesFullscreen;
 import software.kuukkel.fi.recipics.ViewRecipe.ViewRecipe;
 //Based on: https://thepseudocoder.wordpress.com/2011/10/05/android-page-swiping-using-viewpager/
 
@@ -65,8 +66,9 @@ public class ViewPagerFragmentActivity extends FragmentActivity
     public void saveRecipe(View view) {
         CameraFragment cameraFrag = (CameraFragment) fragments.get(0);
         ArrayList<String> picturePaths = cameraFrag.getPicturePaths();
+        //Don't allow recipes without pictures!
         if(picturePaths.size() == 0) {
-            CharSequence text = "You can't save a recipe without a picture!";
+            CharSequence text = getResources().getString(R.string.picture_empty);
             int duration = Toast.LENGTH_LONG;
             Toast toast = Toast.makeText(this, text, duration);
             toast.show();
@@ -76,6 +78,15 @@ public class ViewPagerFragmentActivity extends FragmentActivity
 
         RecipeDetailsFillFragment recipeFrag = (RecipeDetailsFillFragment) fragments.get(1);
         Recipe tmpRecipe = recipeFrag.getRecipe();
+        String name = tmpRecipe.getName();
+        //Don't allow recipes without names
+        if(name.equals("")){
+            CharSequence text = getResources().getString(R.string.name_empty);
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(this, text, duration);
+            toast.show();
+            return;
+        }
         recipe.setName(tmpRecipe.getName());
         recipe.setNotes(tmpRecipe.getNotes());
         recipe.setSource(tmpRecipe.getSource());
@@ -90,7 +101,11 @@ public class ViewPagerFragmentActivity extends FragmentActivity
 
         DBHelper db = new DBHelper(this);
         db.insertRecipe(recipe, tags);
-        startActivity(new Intent(ViewPagerFragmentActivity.this, ViewRecipe.class));
+        Intent intent = new Intent(ViewPagerFragmentActivity.this, ViewPicturesFullscreen.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("paths", recipe.getPicturePaths());
+        startActivity(intent);
+        finish();
     }
 
     public void SaveChosenTags(List<com.cunoraz.tagview.Tag> chosen, List<com.cunoraz.tagview.Tag> notChosen) {

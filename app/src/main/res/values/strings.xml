@@ -13,4 +13,7 @@
     <string name="hint_source">My Favorite Cook Book</string>
     <string name="tags_chosen">Chosen tags</string>
     <string name="tags_available">Available tags</string>
+    <string name="search">Search...</string>
+    <string name="picture_empty">You can\'t save a recipe without a picture!</string>
+    <string name="name_empty">You can\'t save a recipe without a name!</string>
 </resources>
